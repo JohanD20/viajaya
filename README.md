@@ -81,6 +81,9 @@ La base ya está en Supabase. Los dos servicios de Render se crean desde [`rende
    | `viajaya-api` | `DATABASE_CA` | El certificado de Supabase (Database > Settings > SSL Configuration) |
    | `viajaya-api` | `JWT_SECRET` | Uno nuevo: `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"` |
    | `viajaya-api` | `CORS_ORIGENES` | `https://viajaya-web.onrender.com` (más el host de Dynu si lo usa) |
+   | `viajaya-api` | `CORREO_PROVEEDOR` | `brevo` (o `consola` para no enviar correos) |
+   | `viajaya-api` | `CORREO_API_KEY` | La clave de la API de Brevo (ver "Correos al turista") |
+   | `viajaya-api` | `CORREO_REMITENTE` | El correo remitente verificado en Brevo |
    | `viajaya-web` | `VITE_API_URL` | `https://viajaya-api.onrender.com` |
 
 3. Cada push a `main` vuelve a desplegar los dos servicios.
@@ -93,6 +96,20 @@ La base ya está en Supabase. Los dos servicios de Render se crean desde [`rende
 4. Agregue `https://viajaya.giize.com` a `CORS_ORIGENES` de `viajaya-api`.
 
 Antes de la demo, abra `https://viajaya-api.onrender.com/api/salud` unos minutos antes para despertar el plan gratuito (RNF-11).
+
+### Correos al turista
+
+La API avisa por correo cuando se crea, cambia de fecha, cancela o aprueba una reserva (`backend/src/infra/correo`). El correo sale **después** de confirmar la transacción y, si el proveedor falla, la reserva no se afecta: el fallo queda en el log.
+
+El plan gratuito de Render bloquea SMTP, por eso se usa la API HTTPS de un proveedor. `CORREO_PROVEEDOR` elige cuál:
+
+| Valor | Uso |
+|---|---|
+| `consola` | Por omisión. No envía nada; registra el asunto en el log. |
+| `brevo` | Plan gratuito de 300 correos al día. Basta con verificar el correo remitente. |
+| `resend` | Plan gratuito de 3000 al mes. Exige verificar un dominio con registros DNS. |
+
+Para activar Brevo: cree la cuenta en brevo.com, verifique el remitente en *Senders, domains & dedicated IPs*, genere una clave en *SMTP & API > API keys* y póngala en `CORREO_API_KEY` de `viajaya-api` junto con `CORREO_REMITENTE`.
 
 ## Seguridad: JWT y RLS
 
@@ -123,3 +140,4 @@ Antes de la demo, abra `https://viajaya-api.onrender.com/api/salud` unos minutos
 | HU-14 a HU-17 Listar, aprobar, cancelar y eliminar reservas | CU-12 a CU-15 | ✅ backend + panel |
 | HU-18 Actualizar estado de pago | CU-16 | ✅ backend + panel |
 | Mejora: comprobante de la reserva en PDF | CU-03, CU-04 | ✅ pantalla (pdf-lib, en el navegador) |
+| Mejora: correos al turista (confirmación, cambio de fecha, cancelación, aprobación) | CU-03, CU-05, CU-06, CU-13, CU-14 | ✅ backend (Brevo o Resend por API) |

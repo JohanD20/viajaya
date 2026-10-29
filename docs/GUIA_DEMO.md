@@ -18,6 +18,7 @@ Guion para la defensa oral: muestra en vivo los módulos del turista y del admin
 | 2 | Leer el boleto: subtotal 120,00; IVA 15,60; **total 135,60** | **RN-03**: (40 × 3) × 1,13 |
 | 3 | Reservar con la tarjeta `4111111111111112` | CU-03; **RN-04**: termina en par, así que el pago queda Aprobado |
 | 3b | En la confirmación, pulsar **Descargar PDF** | Comprobante con el código, el desglose con IVA y los estados; se genera en el navegador |
+| 3c | Abrir el correo usado en la reserva | Llega la confirmación con el código y el enlace a Mi reserva; también llegan avisos al cambiar la fecha, cancelar o cuando la agencia aprueba |
 | 4 | Reservar otra vez con la tarjeta `4111111111111117` | **RN-04**: termina en impar, así que queda Rechazado y la reserva igual se registra |
 | 5 | En **Mi reserva**, consultar con el código y el correo | CU-04 |
 | 6 | Consultar con un correo distinto | RNF-06: mensaje genérico, sin revelar si el código existe |

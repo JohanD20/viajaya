@@ -32,6 +32,17 @@ services:
         value: '28800'
       - key: BCRYPT_COSTO
         value: '12'
+      # Correos al turista por API HTTPS (el plan gratuito bloquea SMTP).
+      - key: CORREO_PROVEEDOR # consola | brevo | resend (sin valor = consola)
+        sync: false
+      - key: CORREO_API_KEY # clave de la API del proveedor
+        sync: false
+      - key: CORREO_REMITENTE # remitente verificado en el proveedor
+        sync: false
+      - key: CORREO_REMITENTE_NOMBRE
+        value: ViajaYa
+      - key: SITIO_URL
+        value: https://viajaya.giize.com
 
   # ---------- Frontend (SPA estática) ----------
   - type: web
