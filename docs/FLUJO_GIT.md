@@ -43,7 +43,7 @@ gitGraph
 ```powershell
 # Identidad que aparecerá en cada commit
 git config --global user.name "Johan Dávila Moya"
-git config --global user.email "54687684+JohanD20@users.noreply.github.com"  # correo noreply de GitHub: liga los commits a su perfil sin exponer su correo
+git config --global user.email "johan.davila@ucr.ac.cr"  # correo verificado en su cuenta de GitHub
 git config --global init.defaultBranch main
 git config --global pull.rebase false
 
