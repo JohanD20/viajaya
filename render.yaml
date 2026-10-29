@@ -33,7 +33,7 @@ services:
       - key: BCRYPT_COSTO
         value: '12'
       # Correos al turista por API HTTPS (el plan gratuito bloquea SMTP).
-      - key: CORREO_PROVEEDOR # consola | brevo | resend (sin valor = consola)
+      - key: CORREO_PROVEEDOR # resend | brevo | consola (sin valor = consola)
         sync: false
       - key: CORREO_API_KEY # clave de la API del proveedor
         sync: false
