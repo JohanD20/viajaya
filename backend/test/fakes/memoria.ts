@@ -2,7 +2,10 @@ import { randomUUID } from 'node:crypto';
 import type {
   Administrador,
   DatosCliente,
+  DatosDestino,
   Destino,
+  FiltroDestinos,
+  FiltroReservas,
   EntradaBitacora,
   FechaISO,
   NuevaReserva,
@@ -82,6 +85,36 @@ class DestinoRepositoryEnMemoria implements DestinoRepository {
 
   async bloquearPorId(id: Uuid): Promise<Destino | null> {
     return this.buscarPorId(id);
+  }
+
+  async listar(f: FiltroDestinos): Promise<Destino[]> {
+    return this.datos.destinos.filter(
+      (d) =>
+        (f.activo === undefined || d.activo === f.activo) &&
+        (!f.nombre || d.nombre.toLowerCase().includes(f.nombre.toLowerCase())),
+    );
+  }
+
+  async existeNombre(nombre: string, excluirId?: Uuid): Promise<boolean> {
+    return this.datos.destinos.some((d) => d.nombre.toLowerCase() === nombre.toLowerCase() && d.id !== excluirId);
+  }
+
+  async crear(d: DatosDestino): Promise<Destino> {
+    const destino = { id: randomUUID(), activo: true, ...d };
+    this.datos.destinos.push(destino);
+    return { ...destino };
+  }
+
+  async actualizar(id: Uuid, d: DatosDestino & { activo: boolean }): Promise<Destino> {
+    const destino = this.datos.destinos.find((x) => x.id === id);
+    if (!destino) throw new Error('No existe');
+    Object.assign(destino, d);
+    return { ...destino };
+  }
+
+  async cambiarActivo(id: Uuid, activo: boolean): Promise<void> {
+    const destino = this.datos.destinos.find((x) => x.id === id);
+    if (destino) destino.activo = activo;
   }
 }
 
@@ -165,6 +198,54 @@ class ReservaRepositoryEnMemoria implements ReservaRepository {
     if (r) r.estadoReservaId = estado;
   }
 
+  async mayorOcupacionDesde(destinoId: Uuid, desde: FechaISO): Promise<{ fecha: FechaISO; personas: number } | null> {
+    const porFecha = new Map<FechaISO, number>();
+    for (const r of this.datos.reservas) {
+      if (r.destinoId === destinoId && r.fechaViaje >= desde && esReservaActiva(r.estadoReservaId)) {
+        porFecha.set(r.fechaViaje, (porFecha.get(r.fechaViaje) ?? 0) + r.cantidadPersonas);
+      }
+    }
+    const [primera] = [...porFecha.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    return primera ? { fecha: primera[0], personas: primera[1] } : null;
+  }
+
+  async contarActivasDesde(destinoId: Uuid, desde: FechaISO): Promise<number> {
+    return this.datos.reservas.filter(
+      (r) => r.destinoId === destinoId && r.fechaViaje >= desde && esReservaActiva(r.estadoReservaId),
+    ).length;
+  }
+
+  async listarDetalle(f: FiltroReservas): Promise<ReservaDetalle[]> {
+    const lista: ReservaDetalle[] = [];
+    for (const r of this.datos.reservas) {
+      const d = await this.obtenerDetalle(r.id);
+      if (
+        d &&
+        (!f.destinoId || d.destino.id === f.destinoId) &&
+        (!f.desde || d.fechaViaje >= f.desde) &&
+        (!f.hasta || d.fechaViaje <= f.hasta) &&
+        (!f.estadoReservaId || d.estadoReservaId === f.estadoReservaId) &&
+        (!f.estadoPagoId || d.estadoPagoId === f.estadoPagoId)
+      ) {
+        lista.push(d);
+      }
+    }
+    return lista.sort((a, b) => a.fechaViaje.localeCompare(b.fechaViaje));
+  }
+
+  async bloquearPorId(id: Uuid): Promise<Reserva | null> {
+    const r = this.datos.reservas.find((x) => x.id === id);
+    return r ? this.completar(r) : null;
+  }
+
+  async eliminar(id: Uuid): Promise<boolean> {
+    const antes = this.datos.reservas.length;
+    this.datos.reservas = this.datos.reservas.filter((r) => r.id !== id);
+    this.datos.pagos = this.datos.pagos.filter((p) => p.reservaId !== id); // ON DELETE CASCADE
+    this.datos.bitacora = this.datos.bitacora.filter((b) => b.reservaId !== id);
+    return this.datos.reservas.length < antes;
+  }
+
   private buscarPorCodigoYCorreo(codigo: string, correo: string): ReservaEnMemoria | undefined {
     const cliente = this.datos.clientes.find((c) => c.correo === correo);
     return this.datos.reservas.find(
@@ -209,6 +290,15 @@ class PagoRepositoryEnMemoria implements PagoRepository {
 
   async registrar(d: PagoEnMemoria): Promise<void> {
     this.datos.pagos.push({ ...d });
+  }
+
+  async bloquearEstado(reservaId: Uuid): Promise<EstadoPagoId | null> {
+    return this.datos.pagos.find((p) => p.reservaId === reservaId)?.estadoPagoId ?? null;
+  }
+
+  async actualizarEstado(reservaId: Uuid, estado: EstadoPagoId): Promise<void> {
+    const pago = this.datos.pagos.find((p) => p.reservaId === reservaId);
+    if (pago) pago.estadoPagoId = estado;
   }
 }
 
