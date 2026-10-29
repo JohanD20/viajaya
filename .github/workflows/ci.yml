@@ -22,5 +22,7 @@ jobs:
         run: bash .github/ci-paso.sh "lint" npm run lint
       - name: Pruebas unitarias (Mocha)
         run: bash .github/ci-paso.sh "pruebas" npm test
+      - name: Compilar (lo mismo que hará Render)
+        run: bash .github/ci-paso.sh "build" npm run build --workspaces --if-present
       - name: Auditoría de dependencias
         run: bash .github/ci-paso.sh "npm audit" npm audit --omit=dev --audit-level=high
