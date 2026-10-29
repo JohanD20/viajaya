@@ -5,6 +5,16 @@ Equipo: Carlos Ford Edwards, Deiver Ponce Vindas y Johan Dávila Moya.
 
 Plataforma web autoservicio para buscar destinos, cotizar con IVA, reservar con pago simulado y administrar destinos y reservas. La arquitectura está en el SAD 1.1 y los acuerdos de código, seguridad y diseño en [`docs/CONVENCIONES.md`](docs/CONVENCIONES.md).
 
+## En línea
+
+| | URL |
+|---|---|
+| Sitio (dominio Dynu) | https://viajaya.giize.com |
+| Sitio (Render) | https://viajaya-web.onrender.com |
+| API REST | https://viajaya-api.onrender.com/api/salud |
+
+El plan gratuito de Render duerme la API tras unos minutos sin uso; la primera petición tarda hasta un minuto. El guion de la defensa está en [`docs/GUIA_DEMO.md`](docs/GUIA_DEMO.md).
+
 ```
 viajaya/
 ├── backend/     API REST · Node.js + TypeScript + Express (puerto 3000)
@@ -55,7 +65,7 @@ La conexión del backend usa el **pooler de Supabase en modo sesión** con el us
 ## Despliegue en línea
 
 ```
-Navegador ──HTTPS──► viajaya-web (Render, sitio estático)  ◄── <su-host>.dynu.net (opcional)
+Navegador ──HTTPS──► viajaya-web (Render, sitio estático)  ◄── viajaya.giize.com (Dynu)
     │
     └──HTTPS + JWT──► viajaya-api (Render, Node.js) ──TLS──► PostgreSQL con RLS (Supabase)
 ```
@@ -77,10 +87,10 @@ La base ya está en Supabase. Los dos servicios de Render se crean desde [`rende
 
 ### Dominio propio con Dynu (opcional)
 
-1. En dynu.com, en Control Panel > DDNS Services > Add, cree un nombre gratuito, por ejemplo `viajaya.dynu.net`.
+1. En dynu.com, en Control Panel > DDNS Services > Add, cree un nombre gratuito (el proyecto usa `viajaya.giize.com`).
 2. Ponga como **IPv4 Address** `216.24.57.1` (el balanceador de Render) y deje vacía la IPv6, porque Render solo usa IPv4. Desactive la actualización automática de IP.
-3. En Render, en `viajaya-web` > Settings > Custom Domains, agregue `viajaya.dynu.net` y espere a que el certificado HTTPS quede en *Verified*.
-4. Agregue `https://viajaya.dynu.net` a `CORS_ORIGENES` de `viajaya-api`.
+3. En Render, en `viajaya-web` > Settings > Custom Domains, agregue `viajaya.giize.com` y espere a que el certificado HTTPS quede en *Verified*.
+4. Agregue `https://viajaya.giize.com` a `CORS_ORIGENES` de `viajaya-api`.
 
 Antes de la demo, abra `https://viajaya-api.onrender.com/api/salud` unos minutos antes para despertar el plan gratuito (RNF-11).
 
