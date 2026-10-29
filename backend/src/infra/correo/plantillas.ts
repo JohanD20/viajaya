@@ -18,7 +18,7 @@ const MONEDA = new Intl.NumberFormat('es-CR', {
 });
 const FECHA = new Intl.DateTimeFormat('es-CR', { dateStyle: 'full', timeZone: 'UTC' });
 
-const monto = (centimos: number) => MONEDA.format(centimos / 100).replace(/ /g, ' ');
+const monto = (centimos: number) => MONEDA.format(centimos / 100).replace(/\u00a0/g, ' ');
 const fecha = (f: FechaISO) => FECHA.format(new Date(`${f}T00:00:00Z`));
 
 /** Todo dato del turista se escapa antes de entrar al HTML (S-03). */
