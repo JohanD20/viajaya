@@ -8,9 +8,11 @@ import { z } from 'zod';
 const esquemaEntorno = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
-  DATABASE_URL: z.string().url('DATABASE_URL debe ser una URL postgresql://'),
+  DATABASE_URL: z.url({ error: 'DATABASE_URL falta o no es una URL postgresql:// válida' }),
   DATABASE_CA: z.string().optional(),
-  JWT_SECRET: z.string().min(32, 'JWT_SECRET debe tener al menos 32 caracteres'),
+  JWT_SECRET: z
+    .string({ error: 'JWT_SECRET es obligatorio' })
+    .min(32, 'JWT_SECRET debe tener al menos 32 caracteres'),
   JWT_EXPIRA_SEGUNDOS: z.coerce.number().int().positive().default(8 * 60 * 60),
   CORS_ORIGENES: z.string().default('http://localhost:5173'),
   BCRYPT_COSTO: z.coerce.number().int().min(10).max(14).default(12),
