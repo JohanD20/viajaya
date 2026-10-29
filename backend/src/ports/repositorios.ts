@@ -1,4 +1,15 @@
-import type { Administrador, Destino, FechaISO, Uuid } from '../models/dominio';
+import type {
+  Administrador,
+  DatosCliente,
+  Destino,
+  EntradaBitacora,
+  FechaISO,
+  NuevaReserva,
+  Reserva,
+  ReservaDetalle,
+  Uuid,
+} from '../models/dominio';
+import type { EstadoPagoId, EstadoReservaId } from '../models/estados';
 
 /**
  * PUERTOS de acceso a datos (Inversión de dependencias, SAD 2.2).
@@ -25,7 +36,30 @@ export interface ReservaRepository {
    * en la fecha. `excluirReservaId` se usa al cambiar de fecha (RC-04).
    */
   sumarPersonasActivas(destinoId: Uuid, fecha: FechaISO, excluirReservaId?: Uuid): Promise<number>;
-  // HU-10 a HU-17: existeCodigo, crear, buscarPorCodigoYCorreo, cambiarFecha, cambiarEstado…
+  existeCodigo(codigo: string): Promise<boolean>;
+  crear(datos: NuevaReserva): Promise<Uuid>;
+  /** RC-07: código y correo deben coincidir en el mismo registro. */
+  buscarDetallePorCodigoYCorreo(codigo: string, correo: string): Promise<ReservaDetalle | null>;
+  /** Igual que la anterior pero bloquea la fila (FOR UPDATE) dentro de una transacción. */
+  bloquearPorCodigoYCorreo(codigo: string, correo: string): Promise<Reserva | null>;
+  obtenerDetalle(id: Uuid): Promise<ReservaDetalle | null>;
+  cambiarFecha(id: Uuid, fecha: FechaISO): Promise<void>;
+  cambiarEstado(id: Uuid, estado: EstadoReservaId): Promise<void>;
+  // HU-14 a HU-17: listarDetalle(filtro), eliminar…
+}
+
+export interface ClienteRepository {
+  /** Si el correo ya existe, actualiza nombre y teléfono con los últimos datos (SAD 3.5). */
+  registrarOActualizar(datos: DatosCliente): Promise<Uuid>;
+}
+
+export interface PagoRepository {
+  registrar(datos: { reservaId: Uuid; estadoPagoId: EstadoPagoId; ultimos4: string }): Promise<void>;
+  // HU-18: actualizarEstado(reservaId, estado)
+}
+
+export interface BitacoraRepository {
+  registrar(entrada: EntradaBitacora): Promise<void>;
 }
 
 export interface AdministradorRepository {
@@ -34,12 +68,12 @@ export interface AdministradorRepository {
   guardar(datos: { nombre: string; correo: string; passwordHash: string }): Promise<void>;
 }
 
-// HU-10: ClienteRepository, PagoRepository y BitacoraRepository se agregan aquí
-// y en `Repositorios` cuando se implemente la creación de reservas.
-
 /** Conjunto de repositorios que comparten la misma conexión o transacción. */
 export interface Repositorios {
   destinos: DestinoRepository;
   reservas: ReservaRepository;
+  clientes: ClienteRepository;
+  pagos: PagoRepository;
+  bitacora: BitacoraRepository;
   administradores: AdministradorRepository;
 }

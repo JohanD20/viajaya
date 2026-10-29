@@ -3,7 +3,10 @@ import type { Repositorios } from '../../ports/repositorios';
 import type { UnidadDeTrabajo } from '../../ports/unidad-de-trabajo';
 import { type Consultor, consultorDeCliente, consultorDePool } from './consultor';
 import { PgAdministradorRepository } from './PgAdministradorRepository';
+import { PgBitacoraRepository } from './PgBitacoraRepository';
+import { PgClienteRepository } from './PgClienteRepository';
 import { PgDestinoRepository } from './PgDestinoRepository';
+import { PgPagoRepository } from './PgPagoRepository';
 import { PgReservaRepository } from './PgReservaRepository';
 
 /** Crea todos los repositorios sobre la misma conexión. Agregue aquí los nuevos. */
@@ -11,6 +14,9 @@ function crearRepositorios(db: Consultor): Repositorios {
   return {
     destinos: new PgDestinoRepository(db),
     reservas: new PgReservaRepository(db),
+    clientes: new PgClienteRepository(db),
+    pagos: new PgPagoRepository(db),
+    bitacora: new PgBitacoraRepository(db),
     administradores: new PgAdministradorRepository(db),
   };
 }
