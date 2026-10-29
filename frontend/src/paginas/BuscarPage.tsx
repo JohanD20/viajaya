@@ -159,7 +159,7 @@ export function BuscarPage() {
           {errorApi && !errorFecha && !errorPersonas && <Aviso tono="error">{errorApi.message}</Aviso>}
           {cotizacion && (
             <Boleto
-              cotizacion={cotizacion}
+              datos={cotizacion}
               accion={
                 <Link
                   to="/reservar"

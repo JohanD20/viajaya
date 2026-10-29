@@ -1,5 +1,5 @@
 import { almacenSesion } from './almacenSesion';
-import type { Cotizacion, Destino, Disponibilidad, Servicios, SesionAdmin } from './contratos';
+import type { Cotizacion, Destino, Disponibilidad, Reserva, Servicios, SesionAdmin } from './contratos';
 import { ClienteHttp } from './http';
 
 /**
@@ -24,6 +24,13 @@ export function crearServicios(urlBase: string): Servicios {
     },
     reservas: {
       cotizar: (solicitud) => http.post<Cotizacion>('/api/cotizaciones', solicitud),
+      crear: (solicitud) => http.post<Reserva>('/api/reservas', solicitud),
+      // RNF-06: el correo viaja en el cuerpo, nunca en la URL.
+      consultar: (codigo, correo) => http.post<Reserva>('/api/reservas/consulta', { codigo, correo }),
+      cambiarFecha: (codigo, correo, fecha) =>
+        http.patch<Reserva>(`/api/reservas/${encodeURIComponent(codigo)}/fecha`, { correo, fecha }),
+      cancelar: (codigo, correo) =>
+        http.patch<Reserva>(`/api/reservas/${encodeURIComponent(codigo)}/cancelacion`, { correo }),
     },
     auth: {
       async iniciarSesion(correo, password) {

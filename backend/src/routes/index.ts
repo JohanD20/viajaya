@@ -4,7 +4,7 @@ import { AuthController } from '../controllers/AuthController';
 import { DestinosController } from '../controllers/DestinosController';
 import { ReservasController } from '../controllers/ReservasController';
 import { crearAutenticacionAdmin } from '../middlewares/autenticacion';
-import { crearLimiteLogin } from '../middlewares/limites';
+import { crearLimiteConsultaReserva, crearLimiteLogin } from '../middlewares/limites';
 
 /**
  * Contrato de la API REST (SAD 3.1). Cada ruta indica su caso de uso.
@@ -20,11 +20,13 @@ export function crearRouterApi(c: Contenedor): Router {
   api.get('/destinos', destinos.listarActivos); // CU-01
   api.get('/destinos/:id/disponibilidad', destinos.disponibilidad); // CU-01
   api.post('/cotizaciones', reservas.cotizar); // CU-02
-  // Sprint 2 (usar crearLimiteConsultaReserva() en las rutas con código y correo):
-  // api.post('/reservas', reservas.crear);                                    // CU-03
-  // api.post('/reservas/consulta', limiteConsulta, reservas.consultar);        // CU-04
-  // api.patch('/reservas/:codigo/fecha', limiteConsulta, reservas.cambiarFecha);      // CU-05
-  // api.patch('/reservas/:codigo/cancelacion', limiteConsulta, reservas.cancelar);    // CU-06
+  api.post('/reservas', reservas.crear); // CU-03
+
+  // Operaciones con código y correo: límite de intentos contra fuerza bruta (S-07).
+  const limiteConsulta = crearLimiteConsultaReserva();
+  api.post('/reservas/consulta', limiteConsulta, reservas.consultar); // CU-04
+  api.patch('/reservas/:codigo/fecha', limiteConsulta, reservas.cambiarFecha); // CU-05
+  api.patch('/reservas/:codigo/cancelacion', limiteConsulta, reservas.cancelar); // CU-06
 
   api.post('/auth/login', crearLimiteLogin(), auth.login); // CU-07
 
