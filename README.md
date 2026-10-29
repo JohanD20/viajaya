@@ -81,9 +81,9 @@ La base ya está en Supabase. Los dos servicios de Render se crean desde [`rende
    | `viajaya-api` | `DATABASE_CA` | El certificado de Supabase (Database > Settings > SSL Configuration) |
    | `viajaya-api` | `JWT_SECRET` | Uno nuevo: `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"` |
    | `viajaya-api` | `CORS_ORIGENES` | `https://viajaya-web.onrender.com` (más el host de Dynu si lo usa) |
-   | `viajaya-api` | `CORREO_PROVEEDOR` | `resend` (o `consola` para no enviar correos) |
-   | `viajaya-api` | `CORREO_API_KEY` | La clave de la API de Resend (ver "Correos al turista") |
-   | `viajaya-api` | `CORREO_REMITENTE` | `reservas@viajaya.giize.com` (dominio verificado en Resend) |
+   | `viajaya-api` | `CORREO_PROVEEDOR` | `brevo` (o `consola` para no enviar correos) |
+   | `viajaya-api` | `CORREO_API_KEY` | La clave de la API de Brevo (ver "Correos al turista") |
+   | `viajaya-api` | `CORREO_REMITENTE` | `reservas@viajaya.giize.com` (dominio autenticado en Brevo) |
    | `viajaya-web` | `VITE_API_URL` | `https://viajaya-api.onrender.com` |
 
 3. Cada push a `main` vuelve a desplegar los dos servicios.
@@ -106,16 +106,18 @@ El plan gratuito de Render bloquea SMTP, por eso se usa la API HTTPS de un prove
 | Valor | Uso |
 |---|---|
 | `consola` | Por omisión. No envía nada; registra el asunto en el log. |
-| `resend` | El que usa el proyecto. Plan gratuito de 3000 correos al mes; exige verificar el dominio con registros DNS. |
-| `brevo` | Alternativa, también por API. |
+| `brevo` | El que usa el proyecto. Plan gratuito de 300 correos al día, sin tarjeta. |
+| `resend` | Alternativa, también por API (3000 al mes; exige verificar el dominio). |
 
-Para activar Resend:
+Para activar Brevo:
 
-1. En resend.com, en **Domains > Add Domain**, agregue `viajaya.giize.com`. Resend muestra los registros DNS que pide (MX y TXT de SPF en `send`, y TXT de DKIM en `resend._domainkey`).
-2. En Dynu, en DDNS Services > `viajaya.giize.com` > DNS Records, agregue cada registro con el mismo tipo, nombre y valor. No toque el registro A del sitio.
-3. Cuando Resend marque el dominio como *Verified*, cree una clave en **API Keys** (permiso *Sending access*) y póngala en `CORREO_API_KEY` de `viajaya-api`, con `CORREO_REMITENTE=reservas@viajaya.giize.com`.
+1. Cree la cuenta gratuita en brevo.com.
+2. En **Settings > Senders, Domains, IPs > Domains**, agregue `viajaya.giize.com`, pulse **Authenticate** y elija hacerlo usted mismo. Brevo muestra los registros: un TXT con el código de Brevo, el DKIM (dos CNAME o un TXT) y un TXT de DMARC.
+3. En Dynu, en DDNS Services > `viajaya.giize.com` > DNS Records, agregue cada registro con el mismo tipo, nombre y valor. No toque el registro A del sitio. Vuelva a Brevo y pulse **Authenticate this email domain** (los DNS pueden tardar en propagarse).
+4. En **Senders**, agregue el remitente `reservas@viajaya.giize.com` con el nombre `ViajaYa`.
+5. En **SMTP & API > API keys**, genere una clave y póngala en `CORREO_API_KEY` de `viajaya-api`, con `CORREO_PROVEEDOR=brevo` y `CORREO_REMITENTE=reservas@viajaya.giize.com`.
 
-Mientras el dominio no esté verificado se puede probar con `CORREO_REMITENTE=onboarding@resend.dev`, pero Resend solo entrega a la dirección de la cuenta de Resend; a cualquier otra responde 403 (queda en el log y la reserva no se afecta).
+No se recomienda usar un correo de Gmail como remitente: Gmail y Yahoo descartan esos envíos cuando salen desde otro servicio.
 
 ## Seguridad: JWT y RLS
 
@@ -146,4 +148,4 @@ Mientras el dominio no esté verificado se puede probar con `CORREO_REMITENTE=on
 | HU-14 a HU-17 Listar, aprobar, cancelar y eliminar reservas | CU-12 a CU-15 | ✅ backend + panel |
 | HU-18 Actualizar estado de pago | CU-16 | ✅ backend + panel |
 | Mejora: comprobante de la reserva en PDF | CU-03, CU-04 | ✅ pantalla (pdf-lib, en el navegador) |
-| Mejora: correos al turista (confirmación, cambio de fecha, cancelación, aprobación) | CU-03, CU-05, CU-06, CU-13, CU-14 | ✅ backend (Resend por API) |
+| Mejora: correos al turista (confirmación, cambio de fecha, cancelación, aprobación) | CU-03, CU-05, CU-06, CU-13, CU-14 | ✅ backend (Brevo por API) |
