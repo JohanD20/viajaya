@@ -122,3 +122,4 @@ Antes de la demo, abra `https://viajaya-api.onrender.com/api/salud` unos minutos
 | HU-04 a HU-07 Crear, listar, editar/reactivar y desactivar destinos | CU-08 a CU-11 | ✅ backend + panel |
 | HU-14 a HU-17 Listar, aprobar, cancelar y eliminar reservas | CU-12 a CU-15 | ✅ backend + panel |
 | HU-18 Actualizar estado de pago | CU-16 | ✅ backend + panel |
+| Mejora: comprobante de la reserva en PDF | CU-03, CU-04 | ✅ pantalla (pdf-lib, en el navegador) |
