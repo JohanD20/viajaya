@@ -1,0 +1,103 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens de diseño de ViajaYa (docs/CONVENCIONES.md, sección "Estilo de interfaz").
+ * Use SIEMPRE estos nombres (bg-niebla, text-tinta, bg-caribe…) en lugar de colores sueltos.
+ */
+@theme {
+  --color-niebla: #f1f5f3; /* fondo general */
+  --color-superficie: #ffffff; /* paneles y formularios */
+  --color-tinta: #13302b; /* texto principal (contraste 13:1 sobre niebla) */
+  --color-tinta-suave: #4a625c; /* texto secundario (contraste 6:1) */
+  --color-linea: #cddbd6; /* bordes y divisores */
+  --color-caribe: #0e6b61; /* acciones principales y foco */
+  --color-caribe-oscuro: #0a524a; /* hover de acciones */
+  --color-sol: #e8b321; /* SOLO el talón del boleto */
+  --color-error: #b3261e;
+  --color-exito: #1f7a3a;
+
+  --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, sans-serif;
+
+  --radius-control: 0.5rem;
+}
+
+@layer base {
+  html {
+    @apply bg-niebla text-tinta font-sans antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+    text-wrap: balance;
+  }
+  /* Foco visible para navegación con teclado (WCAG 2.1 AA, RNF-09). */
+  :focus-visible {
+    outline: 3px solid var(--color-caribe);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
+
+@layer components {
+  .campo {
+    @apply w-full rounded-control border border-linea bg-superficie px-3 py-2.5 text-base text-tinta;
+  }
+  .campo[aria-invalid='true'] {
+    @apply border-error;
+  }
+  .etiqueta {
+    @apply mb-1 block font-bold text-tinta;
+  }
+  .boton-primario {
+    @apply inline-flex items-center justify-center rounded-control bg-caribe px-5 py-3 font-bold text-white hover:bg-caribe-oscuro disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .boton-secundario {
+    @apply inline-flex items-center justify-center rounded-control border border-caribe px-5 py-3 font-bold text-caribe hover:bg-superficie;
+  }
+  .cifra {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/*
+ * El boleto: el único elemento decorativo del sistema. La cotización se muestra
+ * como un boleto de excursión con talón troquelado color sol.
+ */
+.boleto {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.875rem;
+  background: var(--color-superficie);
+  box-shadow: 0 0 0 1px var(--color-linea);
+}
+.boleto-talon {
+  position: relative;
+  background: var(--color-sol);
+  border-top: 2px dashed color-mix(in srgb, var(--color-tinta) 40%, transparent);
+}
+.boleto-talon::before,
+.boleto-talon::after {
+  content: '';
+  position: absolute;
+  top: -13px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-niebla);
+  box-shadow: inset 0 0 0 1px var(--color-linea);
+}
+.boleto-talon::before {
+  left: -12px;
+}
+.boleto-talon::after {
+  right: -12px;
+}

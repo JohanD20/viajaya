@@ -1,0 +1,62 @@
+# Render Blueprint de ViajaYa (despliegue como código, ADR-10).
+# En Render: New > Blueprint > elegir este repositorio. Render crea los dos servicios
+# y pide los valores marcados con `sync: false` (los secretos NO van en este archivo, S-01).
+# Ambos servicios se despliegan automáticamente con cada push a `main`.
+
+services:
+  # ---------- API REST (Node.js + Express) ----------
+  - type: web
+    name: viajaya-api
+    runtime: node
+    region: virginia # misma región que Supabase (us-east-1)
+    plan: free
+    branch: main
+    buildCommand: npm ci --include=dev && npm run build -w backend
+    startCommand: npm start -w backend
+    healthCheckPath: /api/salud
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL # postgresql://viajaya_api.<ref>:<clave>@<host-pooler>:5432/postgres
+        sync: false
+      - key: DATABASE_CA # certificado PEM de Supabase (recomendado)
+        sync: false
+      - key: JWT_SECRET # 48+ bytes aleatorios; distinto del de desarrollo
+        sync: false
+      - key: CORS_ORIGENES # https://viajaya-web.onrender.com,https://<su-host>.dynu.net
+        sync: false
+      - key: JWT_EXPIRA_SEGUNDOS
+        value: '28800'
+      - key: BCRYPT_COSTO
+        value: '12'
+
+  # ---------- Frontend (SPA estática) ----------
+  - type: web
+    name: viajaya-web
+    runtime: static
+    branch: main
+    buildCommand: npm ci --include=dev && npm run build -w frontend
+    staticPublishPath: frontend/dist
+    autoDeploy: true
+    routes:
+      - type: rewrite # React Router: toda ruta sirve index.html
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      - key: VITE_API_URL # https://viajaya-api.onrender.com
+        sync: false
