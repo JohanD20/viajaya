@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # npm ci instala exactamente lo de package-lock.json (igual que Render).
+      - name: Instalar dependencias
+        run: bash .github/ci-paso.sh "npm ci" npm ci --no-audit --no-fund
+      - name: Revisar tipos (TypeScript)
+        run: bash .github/ci-paso.sh "typecheck" npm run typecheck
+      - name: Lint (ESLint)
+        run: bash .github/ci-paso.sh "lint" npm run lint
+      - name: Pruebas unitarias (Mocha)
+        run: bash .github/ci-paso.sh "pruebas" npm test
+      - name: Compilar (lo mismo que hará Render)
+        run: bash .github/ci-paso.sh "build" npm run build --workspaces --if-present
+      - name: Auditoría de dependencias
+        run: bash .github/ci-paso.sh "npm audit" npm audit --omit=dev --audit-level=high
