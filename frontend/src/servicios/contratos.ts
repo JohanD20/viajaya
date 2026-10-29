@@ -40,6 +40,27 @@ export interface Cotizacion {
   montoTotal: number;
 }
 
+export interface SolicitudReserva extends SolicitudCotizacion {
+  nombre: string;
+  correo: string;
+  telefono: string;
+  numeroTarjeta: string;
+}
+
+export type EstadoReserva = 'Pendiente' | 'Aprobada' | 'Cancelada';
+export type EstadoPago = 'Pendiente' | 'Aprobado' | 'Rechazado';
+
+/** Reserva vista por el turista (CU-03 a CU-06). */
+export interface Reserva extends Cotizacion {
+  codigo: string;
+  estadoReserva: EstadoReserva;
+  estadoPago: EstadoPago | null;
+  tarjetaUltimos4: string | null;
+  cliente: { nombre: string };
+  /** true si aún se puede cambiar la fecha o cancelar (activa y con más de 48 h). */
+  modificable?: boolean;
+}
+
 export interface SesionAdmin {
   id: string;
   nombre: string;
@@ -54,7 +75,10 @@ export interface DestinosApi {
 
 export interface ReservasApi {
   cotizar(solicitud: SolicitudCotizacion): Promise<Cotizacion>;
-  // Sprint 2: crear, consultar, cambiarFecha, cancelar.
+  crear(solicitud: SolicitudReserva): Promise<Reserva>;
+  consultar(codigo: string, correo: string): Promise<Reserva>;
+  cambiarFecha(codigo: string, correo: string, fecha: string): Promise<Reserva>;
+  cancelar(codigo: string, correo: string): Promise<Reserva>;
 }
 
 export interface AuthApi {
