@@ -13,9 +13,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      # Cuando package-lock.json esté versionado, cambiar a `npm ci` y agregar `cache: npm`.
+          cache: npm
+      # npm ci instala exactamente lo de package-lock.json (igual que Render).
       - name: Instalar dependencias
-        run: bash .github/ci-paso.sh "npm install" npm install --no-audit --no-fund
+        run: bash .github/ci-paso.sh "npm ci" npm ci --no-audit --no-fund
       - name: Revisar tipos (TypeScript)
         run: bash .github/ci-paso.sh "typecheck" npm run typecheck
       - name: Lint (ESLint)
