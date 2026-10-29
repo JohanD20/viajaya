@@ -93,6 +93,75 @@ export const cuerpoCambioFecha = z.object({ correo, fecha: fechaISO }).strict();
 /** PATCH /api/reservas/:codigo/cancelacion (CU-06) */
 export const cuerpoCancelacion = z.object({ correo }).strict();
 
+// ---------- Administración (CU-08 a CU-16) ----------
+
+/** Monto positivo con máximo 2 decimales. */
+const montoPositivo = z
+  .number({ required_error: 'El precio es obligatorio.', invalid_type_error: 'Debe ser un número.' })
+  .positive('El precio base debe ser mayor que 0.')
+  .max(99_999_999.99, 'El precio es demasiado alto.')
+  .refine((v) => Math.abs(Math.round(v * 100) - v * 100) < 1e-6, 'Use como máximo 2 decimales.');
+
+const datosDestino = {
+  nombre: z
+    .string({ required_error: 'El nombre es obligatorio.' })
+    .trim()
+    .min(2, 'El nombre es obligatorio.')
+    .max(100, 'Máximo 100 caracteres.'),
+  descripcion: z
+    .string()
+    .trim()
+    .max(1000, 'Máximo 1000 caracteres.')
+    .nullish()
+    .transform((d) => (d ? d : null)),
+  precioBase: montoPositivo,
+  capacidadMaximaDiaria: z
+    .number({ required_error: 'La capacidad es obligatoria.', invalid_type_error: 'Debe ser un número.' })
+    .int('Debe ser un número entero.')
+    .min(1, 'La capacidad debe ser al menos 1.')
+    .max(10_000, 'La capacidad es demasiado alta.'),
+};
+
+/** POST /api/admin/destinos (CU-08) */
+export const cuerpoCrearDestino = z.object(datosDestino).strict();
+
+/** PUT /api/admin/destinos/:id (CU-10, incluye reactivar) */
+export const cuerpoEditarDestino = z
+  .object({ ...datosDestino, activo: z.boolean({ required_error: 'Indique si el destino está activo.' }) })
+  .strict();
+
+/** GET /api/admin/destinos?estado=&nombre= (CU-09) */
+export const filtroDestinos = z
+  .object({
+    estado: z.enum(['activo', 'inactivo', 'todos']).default('todos'),
+    nombre: z.string().trim().max(100).optional(),
+  })
+  .strict();
+
+const estadoReservaTexto = z.enum(['Pendiente', 'Aprobada', 'Cancelada']);
+const estadoPagoTexto = z.enum(['Pendiente', 'Aprobado', 'Rechazado'], {
+  errorMap: () => ({ message: 'Estado de pago inválido: use Pendiente, Aprobado o Rechazado.' }),
+});
+
+/** GET /api/admin/reservas?destinoId=&desde=&hasta=&estadoReserva=&estadoPago= (CU-12) */
+export const filtroReservas = z
+  .object({
+    destinoId: uuid.optional(),
+    desde: fechaISO.optional(),
+    hasta: fechaISO.optional(),
+    estadoReserva: estadoReservaTexto.optional(),
+    estadoPago: estadoPagoTexto.optional(),
+  })
+  .strict();
+
+/** DELETE /api/admin/reservas/:id (CU-15): confirmación escribiendo el código. */
+export const cuerpoEliminarReserva = z
+  .object({ codigoConfirmacion: z.string({ required_error: 'Escriba el código de la reserva.' }) })
+  .strict();
+
+/** PATCH /api/admin/reservas/:id/pago (CU-16) */
+export const cuerpoActualizarPago = z.object({ estadoPago: estadoPagoTexto }).strict();
+
 /** POST /api/auth/login (CU-07) */
 export const cuerpoLogin = z
   .object({

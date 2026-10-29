@@ -1,4 +1,4 @@
-import type { FechaISO, NuevaReserva, Reserva, ReservaDetalle, Uuid } from '../../models/dominio';
+import type { FechaISO, FiltroReservas, NuevaReserva, Reserva, ReservaDetalle, Uuid } from '../../models/dominio';
 import { EstadoReserva, type EstadoPagoId, type EstadoReservaId } from '../../models/estados';
 import type { ReservaRepository } from '../../ports/repositorios';
 import { aCentimos, aTextoDecimal, tasaAPorcentaje } from '../../shared/dinero';
@@ -157,5 +157,61 @@ export class PgReservaRepository implements ReservaRepository {
 
   async cambiarEstado(id: Uuid, estado: EstadoReservaId): Promise<void> {
     await this.db.query('UPDATE reservas SET estado_reserva_id = $2 WHERE id = $1', [id, estado]);
+  }
+
+  async mayorOcupacionDesde(
+    destinoId: Uuid,
+    desde: FechaISO,
+  ): Promise<{ fecha: FechaISO; personas: number } | null> {
+    const rows = await this.db.query<{ fecha: string; personas: number }>(
+      `SELECT fecha_viaje AS fecha, SUM(cantidad_personas)::int AS personas
+         FROM reservas
+        WHERE destino_id = $1 AND fecha_viaje >= $2 AND estado_reserva_id <> $3
+        GROUP BY fecha_viaje
+        ORDER BY personas DESC, fecha_viaje
+        LIMIT 1`,
+      [destinoId, desde, EstadoReserva.Cancelada],
+    );
+    return rows[0] ?? null;
+  }
+
+  async contarActivasDesde(destinoId: Uuid, desde: FechaISO): Promise<number> {
+    const rows = await this.db.query<{ total: number }>(
+      `SELECT count(*)::int AS total
+         FROM reservas
+        WHERE destino_id = $1 AND fecha_viaje >= $2 AND estado_reserva_id <> $3`,
+      [destinoId, desde, EstadoReserva.Cancelada],
+    );
+    return rows[0]?.total ?? 0;
+  }
+
+  async listarDetalle(f: FiltroReservas): Promise<ReservaDetalle[]> {
+    const rows = await this.db.query<FilaDetalle>(
+      `SELECT * FROM v_reservas_detalle
+        WHERE ($1::uuid IS NULL OR destino_id = $1)
+          AND ($2::date IS NULL OR fecha_viaje >= $2)
+          AND ($3::date IS NULL OR fecha_viaje <= $3)
+          AND ($4::smallint IS NULL OR estado_reserva_id = $4)
+          AND ($5::smallint IS NULL OR estado_pago_id = $5)
+        ORDER BY fecha_viaje, creado_en`,
+      [f.destinoId ?? null, f.desde ?? null, f.hasta ?? null, f.estadoReservaId ?? null, f.estadoPagoId ?? null],
+    );
+    return rows.map(aDetalle);
+  }
+
+  async bloquearPorId(id: Uuid): Promise<Reserva | null> {
+    const rows = await this.db.query<FilaReserva>(
+      `SELECT id, codigo_confirmacion, cliente_id, destino_id, estado_reserva_id,
+              fecha_viaje, cantidad_personas, precio_base_aplicado, tasa_iva_aplicada
+         FROM reservas WHERE id = $1
+          FOR UPDATE`,
+      [id],
+    );
+    return rows[0] ? aReserva(rows[0]) : null;
+  }
+
+  async eliminar(id: Uuid): Promise<boolean> {
+    const rows = await this.db.query<{ id: string }>('DELETE FROM reservas WHERE id = $1 RETURNING id', [id]);
+    return rows.length > 0;
   }
 }

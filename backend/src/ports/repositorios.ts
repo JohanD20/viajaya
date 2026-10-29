@@ -1,7 +1,10 @@
 import type {
   Administrador,
   DatosCliente,
+  DatosDestino,
   Destino,
+  FiltroDestinos,
+  FiltroReservas,
   EntradaBitacora,
   FechaISO,
   NuevaReserva,
@@ -27,7 +30,13 @@ export interface DestinoRepository {
    * UnidadDeTrabajo.ejecutar(); serializa las reservas del mismo destino.
    */
   bloquearPorId(id: Uuid): Promise<Destino | null>;
-  // HU-04 a HU-07: crear, listar(filtro), actualizar, desactivar, existeNombre…
+  /** CU-09: todos los destinos (activos e inactivos) con filtro por estado y nombre. */
+  listar(filtro: FiltroDestinos): Promise<Destino[]>;
+  /** Nombre único sin distinguir mayúsculas (CU-08 4b, CU-10 4a). */
+  existeNombre(nombre: string, excluirId?: Uuid): Promise<boolean>;
+  crear(datos: DatosDestino): Promise<Destino>;
+  actualizar(id: Uuid, datos: DatosDestino & { activo: boolean }): Promise<Destino>;
+  cambiarActivo(id: Uuid, activo: boolean): Promise<void>;
 }
 
 export interface ReservaRepository {
@@ -45,7 +54,15 @@ export interface ReservaRepository {
   obtenerDetalle(id: Uuid): Promise<ReservaDetalle | null>;
   cambiarFecha(id: Uuid, fecha: FechaISO): Promise<void>;
   cambiarEstado(id: Uuid, estado: EstadoReservaId): Promise<void>;
-  // HU-14 a HU-17: listarDetalle(filtro), eliminar…
+  /** RC-06: fecha (desde `desde`) con más personas reservadas en el destino. */
+  mayorOcupacionDesde(destinoId: Uuid, desde: FechaISO): Promise<{ fecha: FechaISO; personas: number } | null>;
+  /** CU-11 paso 2: reservas activas del destino desde `desde`. */
+  contarActivasDesde(destinoId: Uuid, desde: FechaISO): Promise<number>;
+  /** CU-12: listado completo con filtros, ordenado por fecha de viaje. */
+  listarDetalle(filtro: FiltroReservas): Promise<ReservaDetalle[]>;
+  bloquearPorId(id: Uuid): Promise<Reserva | null>;
+  /** CU-15: borrado definitivo; el pago y la bitácora se borran en cascada. */
+  eliminar(id: Uuid): Promise<boolean>;
 }
 
 export interface ClienteRepository {
@@ -55,7 +72,9 @@ export interface ClienteRepository {
 
 export interface PagoRepository {
   registrar(datos: { reservaId: Uuid; estadoPagoId: EstadoPagoId; ultimos4: string }): Promise<void>;
-  // HU-18: actualizarEstado(reservaId, estado)
+  /** Estado actual del pago de la reserva, bloqueando la fila (CU-16). */
+  bloquearEstado(reservaId: Uuid): Promise<EstadoPagoId | null>;
+  actualizarEstado(reservaId: Uuid, estado: EstadoPagoId): Promise<void>;
 }
 
 export interface BitacoraRepository {

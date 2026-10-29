@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import type { Contenedor } from '../container';
+import { AdminController } from '../controllers/AdminController';
 import { AuthController } from '../controllers/AuthController';
 import { DestinosController } from '../controllers/DestinosController';
 import { ReservasController } from '../controllers/ReservasController';
@@ -14,6 +15,7 @@ export function crearRouterApi(c: Contenedor): Router {
   const destinos = new DestinosController(c.destinoService);
   const reservas = new ReservasController(c.reservaService);
   const auth = new AuthController(c.authService);
+  const administracion = new AdminController(c.destinoService, c.adminReservaService);
 
   // ---------- Público (turista) ----------
   const api = Router();
@@ -34,8 +36,15 @@ export function crearRouterApi(c: Contenedor): Router {
   const admin = Router();
   admin.use(crearAutenticacionAdmin(c.emisorToken));
   admin.get('/sesion', auth.sesion);
-  // HU-04 a HU-07: POST/GET /destinos, PUT /destinos/:id, PATCH /destinos/:id/desactivacion
-  // HU-14 a HU-18: GET /reservas, PATCH /reservas/:id/aprobacion|cancelacion|pago, DELETE /reservas/:id
+  admin.post('/destinos', administracion.crearDestino); // CU-08
+  admin.get('/destinos', administracion.listarDestinos); // CU-09
+  admin.put('/destinos/:id', administracion.editarDestino); // CU-10
+  admin.patch('/destinos/:id/desactivacion', administracion.desactivarDestino); // CU-11
+  admin.get('/reservas', administracion.listarReservas); // CU-12
+  admin.patch('/reservas/:id/aprobacion', administracion.aprobarReserva); // CU-13
+  admin.patch('/reservas/:id/cancelacion', administracion.cancelarReserva); // CU-14
+  admin.delete('/reservas/:id', administracion.eliminarReserva); // CU-15
+  admin.patch('/reservas/:id/pago', administracion.actualizarPago); // CU-16
   api.use('/admin', admin);
 
   return api;
