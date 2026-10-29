@@ -44,8 +44,8 @@ export class ClienteHttp {
     return this.enviar<T>('PUT', ruta, cuerpo);
   }
 
-  delete<T>(ruta: string): Promise<T> {
-    return this.enviar<T>('DELETE', ruta);
+  delete<T>(ruta: string, cuerpo?: unknown): Promise<T> {
+    return this.enviar<T>('DELETE', ruta, cuerpo);
   }
 
   private async enviar<T>(metodo: string, ruta: string, cuerpo?: unknown): Promise<T> {

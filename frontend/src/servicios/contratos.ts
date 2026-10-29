@@ -61,6 +61,38 @@ export interface Reserva extends Cotizacion {
   modificable?: boolean;
 }
 
+// ---------- Administración (CU-08 a CU-16) ----------
+export interface DestinoAdmin extends Destino {
+  activo: boolean;
+  reservasActivasFuturas?: number;
+}
+
+export interface DatosDestino {
+  nombre: string;
+  descripcion: string | null;
+  precioBase: number;
+  capacidadMaximaDiaria: number;
+}
+
+export interface FiltroDestinosAdmin {
+  estado?: 'activo' | 'inactivo' | 'todos';
+  nombre?: string;
+}
+
+export interface ReservaAdmin extends Reserva {
+  id: string;
+  cliente: { nombre: string; correo: string; telefono: string };
+  creadaEn: string;
+}
+
+export interface FiltroReservasAdmin {
+  destinoId?: string;
+  desde?: string;
+  hasta?: string;
+  estadoReserva?: EstadoReserva;
+  estadoPago?: EstadoPago;
+}
+
 export interface SesionAdmin {
   id: string;
   nombre: string;
@@ -87,8 +119,21 @@ export interface AuthApi {
   cerrarSesion(): void;
 }
 
+export interface AdminApi {
+  listarDestinos(filtro: FiltroDestinosAdmin): Promise<DestinoAdmin[]>;
+  crearDestino(datos: DatosDestino): Promise<DestinoAdmin>;
+  editarDestino(id: string, datos: DatosDestino & { activo: boolean }): Promise<DestinoAdmin>;
+  desactivarDestino(id: string): Promise<void>;
+  listarReservas(filtro: FiltroReservasAdmin): Promise<ReservaAdmin[]>;
+  aprobarReserva(id: string): Promise<ReservaAdmin>;
+  cancelarReserva(id: string): Promise<ReservaAdmin>;
+  eliminarReserva(id: string, codigoConfirmacion: string): Promise<void>;
+  actualizarPago(id: string, estadoPago: EstadoPago): Promise<ReservaAdmin>;
+}
+
 export interface Servicios {
   destinos: DestinosApi;
   reservas: ReservasApi;
   auth: AuthApi;
+  admin: AdminApi;
 }
