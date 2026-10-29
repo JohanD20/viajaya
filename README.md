@@ -83,7 +83,7 @@ La base ya está en Supabase. Los dos servicios de Render se crean desde [`rende
    | `viajaya-api` | `CORS_ORIGENES` | `https://viajaya-web.onrender.com` (más el host de Dynu si lo usa) |
    | `viajaya-api` | `CORREO_PROVEEDOR` | `brevo` (o `consola` para no enviar correos) |
    | `viajaya-api` | `CORREO_API_KEY` | La clave de la API de Brevo (ver "Correos al turista") |
-   | `viajaya-api` | `CORREO_REMITENTE` | `reservas@viajaya.giize.com` (dominio autenticado en Brevo) |
+   | `viajaya-api` | `CORREO_REMITENTE` | El correo remitente verificado en Brevo |
    | `viajaya-web` | `VITE_API_URL` | `https://viajaya-api.onrender.com` |
 
 3. Cada push a `main` vuelve a desplegar los dos servicios.
@@ -112,12 +112,10 @@ El plan gratuito de Render bloquea SMTP, por eso se usa la API HTTPS de un prove
 Para activar Brevo:
 
 1. Cree la cuenta gratuita en brevo.com.
-2. En **Settings > Senders, Domains, IPs > Domains**, agregue `viajaya.giize.com`, pulse **Authenticate** y elija hacerlo usted mismo. Brevo muestra los registros: un TXT con el código de Brevo, el DKIM (dos CNAME o un TXT) y un TXT de DMARC.
-3. En Dynu, en DDNS Services > `viajaya.giize.com` > DNS Records, agregue cada registro con el mismo tipo, nombre y valor. No toque el registro A del sitio. Vuelva a Brevo y pulse **Authenticate this email domain** (los DNS pueden tardar en propagarse).
-4. En **Senders**, agregue el remitente `reservas@viajaya.giize.com` con el nombre `ViajaYa`.
-5. En **SMTP & API > API keys**, genere una clave y póngala en `CORREO_API_KEY` de `viajaya-api`, con `CORREO_PROVEEDOR=brevo` y `CORREO_REMITENTE=reservas@viajaya.giize.com`.
+2. En **Settings > Remitentes, dominio, IP > Remitentes**, agregue un remitente con el nombre `ViajaYa` y confírmelo con el código que llega a ese correo.
+3. En **SMTP y API > Claves API**, genere una clave y póngala en `CORREO_API_KEY` de `viajaya-api`, con `CORREO_PROVEEDOR=brevo` y `CORREO_REMITENTE` igual al correo verificado.
 
-No se recomienda usar un correo de Gmail como remitente: Gmail y Yahoo descartan esos envíos cuando salen desde otro servicio.
+El dominio `viajaya.giize.com` no se puede autenticar en Brevo todavía: Dynu solo permite registros TXT en dominios gratuitos con más de 30 días. Mientras tanto, Brevo envía con su propio DKIM y cambia la dirección del remitente por una suya (el nombre "ViajaYa" se mantiene), por lo que los primeros correos pueden llegar a spam. Cuando el dominio cumpla 30 días, se pueden agregar en Dynu los registros que muestra Brevo en **Dominios** (código de Brevo, DKIM y DMARC) y usar `reservas@viajaya.giize.com`.
 
 ## Seguridad: JWT y RLS
 
