@@ -1,0 +1,18 @@
+# Dependencias y compilados
+node_modules/
+dist/
+coverage/
+.nyc_output/
+
+# Secretos (S-01): nunca se versionan
+.env
+.env.*
+!.env.example
+
+# Editor y sistema
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.log
