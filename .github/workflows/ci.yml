@@ -15,12 +15,12 @@ jobs:
           node-version: 22
       # Cuando package-lock.json esté versionado, cambiar a `npm ci` y agregar `cache: npm`.
       - name: Instalar dependencias
-        run: npm install --no-audit --no-fund
+        run: bash .github/ci-paso.sh "npm install" npm install --no-audit --no-fund
       - name: Revisar tipos (TypeScript)
-        run: npm run typecheck
+        run: bash .github/ci-paso.sh "typecheck" npm run typecheck
       - name: Lint (ESLint)
-        run: npm run lint
+        run: bash .github/ci-paso.sh "lint" npm run lint
       - name: Pruebas unitarias (Mocha)
-        run: npm test
+        run: bash .github/ci-paso.sh "pruebas" npm test
       - name: Auditoría de dependencias
-        run: npm audit --omit=dev --audit-level=high
+        run: bash .github/ci-paso.sh "npm audit" npm audit --omit=dev --audit-level=high

@@ -45,7 +45,7 @@ export function crearManejadorErrores(logger: Logger): ErrorRequestHandler {
 
     if (error instanceof ZodError) {
       const errores = error.issues.map((i) => ({
-        campo: i.path.join('.') || '(cuerpo)',
+        campo: i.path.map(String).join('.') || '(cuerpo)',
         mensaje: i.message,
       }));
       enviarProblema(req, res, 400, 'Datos inválidos', 'Revise los campos marcados.', { errores });
