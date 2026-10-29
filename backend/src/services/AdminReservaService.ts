@@ -13,7 +13,9 @@ import {
   esReservaActiva,
 } from '../models/estados';
 import type { Repositorios } from '../ports/repositorios';
+import type { Notificador } from '../ports/servicios-externos';
 import type { UnidadDeTrabajo } from '../ports/unidad-de-trabajo';
+import { SIN_AVISOS, avisar } from './avisos';
 
 /**
  * Casos de uso del administrador sobre reservas y pagos: CU-12 a CU-16.
@@ -21,7 +23,11 @@ import type { UnidadDeTrabajo } from '../ports/unidad-de-trabajo';
  * administrador que lo hizo (OBJ-04).
  */
 export class AdminReservaService {
-  constructor(private readonly uow: UnidadDeTrabajo) {}
+  constructor(
+    private readonly uow: UnidadDeTrabajo,
+    /** Correos al turista cuando la agencia aprueba o cancela su reserva. */
+    private readonly notificador: Notificador = SIN_AVISOS,
+  ) {}
 
   /** CU-12 · Listado completo con filtros. */
   async listar(filtro: FiltroReservas): Promise<ReservaDetalle[]> {
@@ -30,7 +36,7 @@ export class AdminReservaService {
 
   /** CU-13 · Aprobar una reserva Pendiente. */
   async aprobar(id: Uuid, admin: SesionAdmin): Promise<ReservaDetalle> {
-    return this.uow.ejecutar(async (repos) => {
+    const detalle = await this.uow.ejecutar(async (repos) => {
       const reserva = await this.bloquear(repos, id);
       if (reserva.estadoReservaId !== EstadoReserva.Pendiente) {
         throw new ReservaNoActivaError(
@@ -47,11 +53,14 @@ export class AdminReservaService {
       });
       return this.detalle(repos, id);
     });
+
+    avisar(this.notificador, { evento: 'APROBADA', reserva: detalle });
+    return detalle;
   }
 
   /** CU-14 · Cancelar por decisión de la agencia, sin la restricción de 48 h (SUP-04). */
   async cancelar(id: Uuid, admin: SesionAdmin): Promise<ReservaDetalle> {
-    return this.uow.ejecutar(async (repos) => {
+    const detalle = await this.uow.ejecutar(async (repos) => {
       const reserva = await this.bloquear(repos, id);
       if (!esReservaActiva(reserva.estadoReservaId)) {
         throw new ReservaNoActivaError('La reserva ya estaba cancelada.'); // flujo 4a
@@ -66,6 +75,9 @@ export class AdminReservaService {
       });
       return this.detalle(repos, id);
     });
+
+    avisar(this.notificador, { evento: 'CANCELADA_POR_AGENCIA', reserva: detalle });
+    return detalle;
   }
 
   /**

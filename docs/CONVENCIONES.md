@@ -89,7 +89,7 @@ Nunca use `uow.lectura` dentro de una transacción: esa conexión no ve el bloqu
 | S-04 | **Autenticación del administrador:** bcrypt costo 12; JWT HS256 con algoritmo, emisor y audiencia fijos al verificar; vigencia de 8 h. El middleware se monta **una vez sobre todo `/api/admin`**. | `infra/`, `routes/index.ts` |
 | S-05 | **Tarjeta:** solo dígitos (13 a 19); no se piden CVV ni vencimiento; se guardan solo los últimos 4 dígitos; nunca se escriben en logs. | `PagoSimuladoService`, `config/logger.ts` |
 | S-06 | **Aleatoriedad segura:** `crypto.randomInt` para el código VY-XXXXXX, con un alfabeto sin 0/O/1/I. `Math.random` está prohibido (ESLint). | `GeneradorCodigoAleatorio` |
-| S-07 | **Límite de intentos por IP:** 5/min en el login y 10/min en las rutas con código y correo. | `middlewares/limites.ts` |
+| S-07 | **Límite de intentos por IP:** 5/min en el login, 10/min en las rutas con código y correo, y 10 reservas cada 10 min (cada una envía un correo). | `middlewares/limites.ts` |
 | S-08 | **Cabeceras y red:** helmet, CORS solo para los orígenes de `CORS_ORIGENES`, HTTPS (Render). | `app.ts` |
 | S-09 | **Base de datos con mínimo privilegio:** RLS en las 8 tablas; `anon` y `authenticated` sin permisos; el backend usa el rol `viajaya_api` (no `postgres`). El frontend **nunca** usa `supabase-js` ni la anon key. | `database/migrations/` |
 | S-10 | **Errores sin fugas:** problem+json, sin stack traces ni mensajes internos. Mensaje genérico en el login ("Credenciales inválidas.") y en la consulta de reservas (RNF-06). | `middlewares/errores.ts`, `AuthService` |
