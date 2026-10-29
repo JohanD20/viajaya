@@ -29,7 +29,13 @@ import type {
   Repositorios,
   ReservaRepository,
 } from '../../src/ports/repositorios';
-import type { EmisorToken, HasherContrasena, Reloj } from '../../src/ports/servicios-externos';
+import type {
+  EmisorToken,
+  HasherContrasena,
+  NotificacionReserva,
+  Notificador,
+  Reloj,
+} from '../../src/ports/servicios-externos';
 import type { UnidadDeTrabajo } from '../../src/ports/unidad-de-trabajo';
 import { TarifaService } from '../../src/rules/TarifaService';
 
@@ -330,6 +336,8 @@ export class UnidadDeTrabajoEnMemoria implements UnidadDeTrabajo {
   readonly lectura: Repositorios;
   transaccionesAbiertas = 0;
   transaccionesRevertidas = 0;
+  /** true mientras corre un trabajo (antes del COMMIT o ROLLBACK simulado). */
+  enTransaccion = false;
 
   constructor(readonly datos = new DatosEnMemoria()) {
     this.lectura = {
@@ -345,12 +353,15 @@ export class UnidadDeTrabajoEnMemoria implements UnidadDeTrabajo {
   async ejecutar<T>(trabajo: (repos: Repositorios) => Promise<T>): Promise<T> {
     this.transaccionesAbiertas++;
     const copia = structuredClone({ ...this.datos });
+    this.enTransaccion = true;
     try {
       return await trabajo(this.lectura);
     } catch (error) {
       Object.assign(this.datos, copia);
       this.transaccionesRevertidas++;
       throw error;
+    } finally {
+      this.enTransaccion = false;
     }
   }
 }
@@ -421,4 +432,20 @@ export function sembrarReserva(
   };
   datos.reservas.push(reserva);
   return reserva;
+}
+
+/**
+ * Guarda los avisos en lugar de enviarlos. Anota si llegaron dentro de una
+ * transacción (no debería pasar) y puede simular un proveedor caído.
+ */
+export class NotificadorEnMemoria implements Notificador {
+  readonly enviados: Array<NotificacionReserva & { dentroDeTransaccion: boolean }> = [];
+  fallar = false;
+
+  constructor(private readonly uow?: UnidadDeTrabajoEnMemoria) {}
+
+  async notificar(n: NotificacionReserva): Promise<void> {
+    this.enviados.push({ ...n, dentroDeTransaccion: this.uow?.enTransaccion ?? false });
+    if (this.fallar) throw new Error('Proveedor de correo caído');
+  }
 }

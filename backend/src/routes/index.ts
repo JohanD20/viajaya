@@ -5,7 +5,11 @@ import { AuthController } from '../controllers/AuthController';
 import { DestinosController } from '../controllers/DestinosController';
 import { ReservasController } from '../controllers/ReservasController';
 import { crearAutenticacionAdmin } from '../middlewares/autenticacion';
-import { crearLimiteConsultaReserva, crearLimiteLogin } from '../middlewares/limites';
+import {
+  crearLimiteConsultaReserva,
+  crearLimiteCreacionReserva,
+  crearLimiteLogin,
+} from '../middlewares/limites';
 
 /**
  * Contrato de la API REST (SAD 3.1). Cada ruta indica su caso de uso.
@@ -22,7 +26,7 @@ export function crearRouterApi(c: Contenedor): Router {
   api.get('/destinos', destinos.listarActivos); // CU-01
   api.get('/destinos/:id/disponibilidad', destinos.disponibilidad); // CU-01
   api.post('/cotizaciones', reservas.cotizar); // CU-02
-  api.post('/reservas', reservas.crear); // CU-03
+  api.post('/reservas', crearLimiteCreacionReserva(), reservas.crear); // CU-03 (envía correo: límite S-07)
 
   // Operaciones con código y correo: límite de intentos contra fuerza bruta (S-07).
   const limiteConsulta = crearLimiteConsultaReserva();

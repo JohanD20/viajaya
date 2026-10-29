@@ -5,6 +5,16 @@ Equipo: Carlos Ford Edwards, Deiver Ponce Vindas y Johan Dávila Moya.
 
 Plataforma web autoservicio para buscar destinos, cotizar con IVA, reservar con pago simulado y administrar destinos y reservas. La arquitectura está en el SAD 1.1 y los acuerdos de código, seguridad y diseño en [`docs/CONVENCIONES.md`](docs/CONVENCIONES.md).
 
+## En línea
+
+| | URL |
+|---|---|
+| Sitio (dominio Dynu) | https://viajaya.giize.com |
+| Sitio (Render) | https://viajaya-web.onrender.com |
+| API REST | https://viajaya-api.onrender.com/api/salud |
+
+El plan gratuito de Render duerme la API tras unos minutos sin uso; la primera petición tarda hasta un minuto. El guion de la defensa está en [`docs/GUIA_DEMO.md`](docs/GUIA_DEMO.md).
+
 ```
 viajaya/
 ├── backend/     API REST · Node.js + TypeScript + Express (puerto 3000)
@@ -55,7 +65,7 @@ La conexión del backend usa el **pooler de Supabase en modo sesión** con el us
 ## Despliegue en línea
 
 ```
-Navegador ──HTTPS──► viajaya-web (Render, sitio estático)  ◄── <su-host>.dynu.net (opcional)
+Navegador ──HTTPS──► viajaya-web (Render, sitio estático)  ◄── viajaya.giize.com (Dynu)
     │
     └──HTTPS + JWT──► viajaya-api (Render, Node.js) ──TLS──► PostgreSQL con RLS (Supabase)
 ```
@@ -71,18 +81,41 @@ La base ya está en Supabase. Los dos servicios de Render se crean desde [`rende
    | `viajaya-api` | `DATABASE_CA` | El certificado de Supabase (Database > Settings > SSL Configuration) |
    | `viajaya-api` | `JWT_SECRET` | Uno nuevo: `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"` |
    | `viajaya-api` | `CORS_ORIGENES` | `https://viajaya-web.onrender.com` (más el host de Dynu si lo usa) |
+   | `viajaya-api` | `CORREO_PROVEEDOR` | `brevo` (o `consola` para no enviar correos) |
+   | `viajaya-api` | `CORREO_API_KEY` | La clave de la API de Brevo (ver "Correos al turista") |
+   | `viajaya-api` | `CORREO_REMITENTE` | El correo remitente verificado en Brevo |
    | `viajaya-web` | `VITE_API_URL` | `https://viajaya-api.onrender.com` |
 
 3. Cada push a `main` vuelve a desplegar los dos servicios.
 
 ### Dominio propio con Dynu (opcional)
 
-1. En dynu.com, en Control Panel > DDNS Services > Add, cree un nombre gratuito, por ejemplo `viajaya.dynu.net`.
+1. En dynu.com, en Control Panel > DDNS Services > Add, cree un nombre gratuito (el proyecto usa `viajaya.giize.com`).
 2. Ponga como **IPv4 Address** `216.24.57.1` (el balanceador de Render) y deje vacía la IPv6, porque Render solo usa IPv4. Desactive la actualización automática de IP.
-3. En Render, en `viajaya-web` > Settings > Custom Domains, agregue `viajaya.dynu.net` y espere a que el certificado HTTPS quede en *Verified*.
-4. Agregue `https://viajaya.dynu.net` a `CORS_ORIGENES` de `viajaya-api`.
+3. En Render, en `viajaya-web` > Settings > Custom Domains, agregue `viajaya.giize.com` y espere a que el certificado HTTPS quede en *Verified*.
+4. Agregue `https://viajaya.giize.com` a `CORS_ORIGENES` de `viajaya-api`.
 
 Antes de la demo, abra `https://viajaya-api.onrender.com/api/salud` unos minutos antes para despertar el plan gratuito (RNF-11).
+
+### Correos al turista
+
+La API avisa por correo cuando se crea, cambia de fecha, cancela o aprueba una reserva (`backend/src/infra/correo`). El correo sale **después** de confirmar la transacción y, si el proveedor falla, la reserva no se afecta: el fallo queda en el log.
+
+El plan gratuito de Render bloquea SMTP, por eso se usa la API HTTPS de un proveedor. `CORREO_PROVEEDOR` elige cuál:
+
+| Valor | Uso |
+|---|---|
+| `consola` | Por omisión. No envía nada; registra el asunto en el log. |
+| `brevo` | El que usa el proyecto. Plan gratuito de 300 correos al día, sin tarjeta. |
+| `resend` | Alternativa, también por API (3000 al mes; exige verificar el dominio). |
+
+Para activar Brevo:
+
+1. Cree la cuenta gratuita en brevo.com.
+2. En **Settings > Remitentes, dominio, IP > Remitentes**, agregue un remitente con el nombre `ViajaYa` y confírmelo con el código que llega a ese correo.
+3. En **SMTP y API > Claves API**, genere una clave y póngala en `CORREO_API_KEY` de `viajaya-api`, con `CORREO_PROVEEDOR=brevo` y `CORREO_REMITENTE` igual al correo verificado.
+
+El dominio `viajaya.giize.com` no se puede autenticar en Brevo todavía: Dynu solo permite registros TXT en dominios gratuitos con más de 30 días. Mientras tanto, Brevo envía con su propio DKIM y cambia la dirección del remitente por una suya (el nombre "ViajaYa" se mantiene), por lo que los primeros correos pueden llegar a spam. Cuando el dominio cumpla 30 días, se pueden agregar en Dynu los registros que muestra Brevo en **Dominios** (código de Brevo, DKIM y DMARC) y usar `reservas@viajaya.giize.com`.
 
 ## Seguridad: JWT y RLS
 
@@ -112,3 +145,5 @@ Antes de la demo, abra `https://viajaya-api.onrender.com/api/salud` unos minutos
 | HU-04 a HU-07 Crear, listar, editar/reactivar y desactivar destinos | CU-08 a CU-11 | ✅ backend + panel |
 | HU-14 a HU-17 Listar, aprobar, cancelar y eliminar reservas | CU-12 a CU-15 | ✅ backend + panel |
 | HU-18 Actualizar estado de pago | CU-16 | ✅ backend + panel |
+| Mejora: comprobante de la reserva en PDF | CU-03, CU-04 | ✅ pantalla (pdf-lib, en el navegador) |
+| Mejora: correos al turista (confirmación, cambio de fecha, cancelación, aprobación) | CU-03, CU-05, CU-06, CU-13, CU-14 | ✅ backend (Brevo por API) |

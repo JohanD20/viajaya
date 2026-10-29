@@ -2,6 +2,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Aviso } from '../componentes/Aviso';
 import { Boleto } from '../componentes/Boleto';
+import { BotonPdf } from '../componentes/BotonPdf';
 import { Campo } from '../componentes/Campo';
 import type { Cotizacion, Reserva, SolicitudCotizacion } from '../servicios/contratos';
 import { ErrorApi } from '../servicios/http';
@@ -84,6 +85,7 @@ export function ReservarPage() {
           <Link to="/mi-reserva" className="boton-primario">
             Ir a Mi reserva
           </Link>
+          <BotonPdf reserva={reserva} />
           <Link to="/" className="boton-secundario">
             Ver más destinos
           </Link>
