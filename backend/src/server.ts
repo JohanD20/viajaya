@@ -17,7 +17,15 @@ function iniciar(): void {
     logger.warn('DATABASE_CA no está definido: la conexión TLS no verifica el certificado del servidor.');
   }
 
-  const contenedor = crearContenedor(config);
+  if (config.correo.proveedor === 'consola') {
+    const aviso = 'CORREO_PROVEEDOR=consola: los correos al turista solo se registran en el log, no se envían.';
+    if (config.entorno === 'production') logger.warn(aviso);
+    else logger.info(aviso);
+  } else {
+    logger.info(`Correos al turista por ${config.correo.proveedor}.`);
+  }
+
+  const contenedor = crearContenedor(config, logger);
   const app = crearApp(contenedor, { origenesPermitidos: config.origenesPermitidos, logger });
 
   const servidor = app.listen(config.puerto, () => {
