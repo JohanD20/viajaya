@@ -1,5 +1,14 @@
 import { almacenSesion } from './almacenSesion';
-import type { Cotizacion, Destino, Disponibilidad, Reserva, Servicios, SesionAdmin } from './contratos';
+import type {
+  Cotizacion,
+  Destino,
+  DestinoAdmin,
+  Disponibilidad,
+  Reserva,
+  ReservaAdmin,
+  Servicios,
+  SesionAdmin,
+} from './contratos';
 import { ClienteHttp } from './http';
 
 /**
@@ -44,5 +53,30 @@ export function crearServicios(urlBase: string): Servicios {
       sesionActual: () => http.get<SesionAdmin>('/api/admin/sesion'),
       cerrarSesion: almacenSesion.borrar,
     },
+    admin: {
+      listarDestinos: (filtro) => http.get<DestinoAdmin[]>(`/api/admin/destinos${consulta(filtro)}`),
+      crearDestino: (datos) => http.post<DestinoAdmin>('/api/admin/destinos', datos),
+      editarDestino: (id, datos) => http.put<DestinoAdmin>(`/api/admin/destinos/${encodeURIComponent(id)}`, datos),
+      desactivarDestino: (id) =>
+        http.patch<void>(`/api/admin/destinos/${encodeURIComponent(id)}/desactivacion`, {}),
+      listarReservas: (filtro) => http.get<ReservaAdmin[]>(`/api/admin/reservas${consulta(filtro)}`),
+      aprobarReserva: (id) => http.patch<ReservaAdmin>(`/api/admin/reservas/${encodeURIComponent(id)}/aprobacion`, {}),
+      cancelarReserva: (id) =>
+        http.patch<ReservaAdmin>(`/api/admin/reservas/${encodeURIComponent(id)}/cancelacion`, {}),
+      eliminarReserva: (id, codigoConfirmacion) =>
+        http.delete<void>(`/api/admin/reservas/${encodeURIComponent(id)}`, { codigoConfirmacion }),
+      actualizarPago: (id, estadoPago) =>
+        http.patch<ReservaAdmin>(`/api/admin/reservas/${encodeURIComponent(id)}/pago`, { estadoPago }),
+    },
   };
+}
+
+/** Arma "?a=1&b=2" omitiendo los filtros vacíos. */
+function consulta(filtro: object): string {
+  const params = new URLSearchParams();
+  for (const [clave, valor] of Object.entries(filtro)) {
+    if (valor !== undefined && valor !== null && valor !== '') params.set(clave, String(valor));
+  }
+  const texto = params.toString();
+  return texto ? `?${texto}` : '';
 }

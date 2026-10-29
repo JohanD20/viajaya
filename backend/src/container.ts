@@ -7,6 +7,7 @@ import { RelojSistema } from './infra/RelojSistema';
 import type { EmisorToken } from './ports/servicios-externos';
 import { PgUnidadDeTrabajo } from './repositories/pg/PgUnidadDeTrabajo';
 import { PagoSimuladoService } from './rules/PagoSimuladoService';
+import { AdminReservaService } from './services/AdminReservaService';
 import { AuthService } from './services/AuthService';
 import { DestinoService } from './services/DestinoService';
 import { ReservaService } from './services/ReservaService';
@@ -18,6 +19,7 @@ import { ReservaService } from './services/ReservaService';
 export interface Contenedor {
   destinoService: DestinoService;
   reservaService: ReservaService;
+  adminReservaService: AdminReservaService;
   authService: AuthService;
   emisorToken: EmisorToken;
   verificarBaseDatos(): Promise<void>;
@@ -44,6 +46,7 @@ export function crearContenedor(config: Config): Contenedor {
   return {
     destinoService: new DestinoService(uow, reloj),
     reservaService: new ReservaService({ uow, reloj, pasarela, generadorCodigo }),
+    adminReservaService: new AdminReservaService(uow),
     authService: new AuthService(uow.lectura.administradores, hasher, emisorToken),
     emisorToken,
     async verificarBaseDatos() {

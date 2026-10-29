@@ -99,15 +99,16 @@ Antes de la demo, abra `https://viajaya-api.onrender.com/api/salud` unos minutos
 | Historia | Caso de uso | Estado |
 |---|---|---|
 | HU-01 Monorepo, TypeScript, Mocha | — | ✅ |
-| HU-02 Esquema, RLS, semillas | — | ✅ (falta crear el administrador con el script) |
+| HU-02 Esquema, RLS, semillas | — | ✅ |
 | HU-03 Inicio de sesión con JWT | CU-07 | ✅ backend + pantalla |
 | HU-08 Búsqueda y disponibilidad | CU-01 | ✅ backend + pantalla |
 | HU-09 Cotización con IVA | CU-02, CU-19 | ✅ backend + pantalla |
 | RN-01 a RN-04 | CU-17 a CU-20 | ✅ reglas + 7 pruebas del SRS |
 | Pruebas RF-01 a RF-06 | — | ✅ las 10 del SRS (UT-RF01 a UT-RF06-b) |
-| HU-04 a HU-07 Destinos (admin) | CU-08 a CU-11 | ⏳ |
 | HU-10 Crear reserva con cupo transaccional y pago simulado | CU-03, CU-17, CU-20 | ✅ backend + pantalla |
 | HU-11 Consultar reserva | CU-04 | ✅ backend + pantalla |
 | HU-12 Cambiar fecha | CU-05, CU-18 | ✅ backend + pantalla |
 | HU-13 Cancelar reserva (turista) | CU-06 | ✅ backend + pantalla |
-| HU-14 a HU-18 Reservas y pagos (admin) | CU-12 a CU-16 | ⏳ |
+| HU-04 a HU-07 Crear, listar, editar/reactivar y desactivar destinos | CU-08 a CU-11 | ✅ backend + panel |
+| HU-14 a HU-17 Listar, aprobar, cancelar y eliminar reservas | CU-12 a CU-15 | ✅ backend + panel |
+| HU-18 Actualizar estado de pago | CU-16 | ✅ backend + panel |

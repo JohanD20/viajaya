@@ -1,4 +1,4 @@
-import type { Destino, ReservaDetalle } from '../models/dominio';
+import type { Destino, DestinoAdmin, ReservaDetalle } from '../models/dominio';
 import { NOMBRE_ESTADO_PAGO, NOMBRE_ESTADO_RESERVA } from '../models/estados';
 import type { Cotizacion } from '../services/ReservaService';
 import { aDecimal } from '../shared/dinero';
@@ -51,5 +51,24 @@ export function reservaPublica(r: ReservaDetalle, modificable?: boolean) {
     tarjetaUltimos4: r.tarjetaUltimos4,
     cliente: { nombre: r.cliente.nombre },
     ...(modificable === undefined ? {} : { modificable }),
+  };
+}
+
+/** Destino visto por el administrador (CU-09). */
+export function destinoAdmin(d: DestinoAdmin | Destino) {
+  return {
+    ...destinoPublico(d),
+    activo: d.activo,
+    ...('reservasActivasFuturas' in d ? { reservasActivasFuturas: d.reservasActivasFuturas } : {}),
+  };
+}
+
+/** Reserva vista por el administrador (CU-12 a CU-16): incluye contacto del cliente. */
+export function reservaAdmin(r: ReservaDetalle) {
+  return {
+    id: r.id,
+    ...reservaPublica(r),
+    cliente: r.cliente,
+    creadaEn: r.creadoEn,
   };
 }

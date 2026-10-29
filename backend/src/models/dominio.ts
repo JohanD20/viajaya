@@ -21,6 +21,33 @@ export interface Destino {
   activo: boolean;
 }
 
+/** Datos editables de un destino (CU-08, CU-10). */
+export interface DatosDestino {
+  nombre: string;
+  descripcion: string | null;
+  precioBaseCentimos: number;
+  capacidadMaximaDiaria: number;
+}
+
+/** Destino visto por el administrador (CU-09), con sus reservas activas desde hoy. */
+export interface DestinoAdmin extends Destino {
+  reservasActivasFuturas: number;
+}
+
+export interface FiltroDestinos {
+  activo?: boolean;
+  nombre?: string;
+}
+
+/** Filtros del listado de reservas del administrador (CU-12). */
+export interface FiltroReservas {
+  destinoId?: Uuid;
+  desde?: FechaISO;
+  hasta?: FechaISO;
+  estadoReservaId?: EstadoReservaId;
+  estadoPagoId?: EstadoPagoId;
+}
+
 /** Registro de cliente: datos de contacto del turista, sin cuenta ni contraseña (SAD 3.5). */
 export interface DatosCliente {
   nombre: string;
