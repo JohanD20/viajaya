@@ -13,12 +13,13 @@ import {
   esReservaActiva,
 } from '../models/estados';
 import type { Repositorios } from '../ports/repositorios';
-import type { GeneradorCodigo, PasarelaPago, Reloj } from '../ports/servicios-externos';
+import type { GeneradorCodigo, Notificador, PasarelaPago, Reloj } from '../ports/servicios-externos';
 import type { UnidadDeTrabajo } from '../ports/unidad-de-trabajo';
 import { CupoService } from '../rules/CupoService';
 import { TarifaService, type Tarifa } from '../rules/TarifaService';
 import { VentanaService } from '../rules/VentanaService';
 import { esFechaFutura } from '../shared/fechas';
+import { SIN_AVISOS, avisar } from './avisos';
 
 export interface DependenciasReservaService {
   uow: UnidadDeTrabajo;
@@ -27,6 +28,8 @@ export interface DependenciasReservaService {
   pasarela: PasarelaPago;
   /** Código VY-XXXXXX. */
   generadorCodigo: GeneradorCodigo;
+  /** Correos al turista. Si no se indica, no se envía ningún aviso. */
+  notificador?: Notificador;
 }
 
 export interface SolicitudCotizacion {
@@ -62,7 +65,11 @@ const INTENTOS_CODIGO = 5;
  * CU-04 consultar, CU-05 cambiar fecha y CU-06 cancelar.
  */
 export class ReservaService {
-  constructor(private readonly deps: DependenciasReservaService) {}
+  private readonly notificador: Notificador;
+
+  constructor(private readonly deps: DependenciasReservaService) {
+    this.notificador = deps.notificador ?? SIN_AVISOS;
+  }
 
   // ------------------------------------------------------------------ CU-02
   /** Cotizar reserva · RN-03 mediante CU-19. No reserva cupo ni guarda datos. */
@@ -101,7 +108,7 @@ export class ReservaService {
   async crear(s: SolicitudReserva): Promise<ReservaDetalle> {
     this.exigirFechaFutura(s.fecha); // flujo 5b
 
-    return this.deps.uow.ejecutar(async (repos) => {
+    const reserva = await this.deps.uow.ejecutar(async (repos) => {
       // Paso 5 · CU-17 Validar cupo con el destino bloqueado (RN-01).
       const destino = await repos.destinos.bloquearPorId(s.destinoId);
       if (!destino) throw new NoEncontradoError('El destino no existe.');
@@ -146,6 +153,10 @@ export class ReservaService {
 
       return this.detalleObligatorio(repos, reservaId);
     });
+
+    // Paso 9 · Confirmación por correo, ya confirmada la transacción.
+    avisar(this.notificador, { evento: 'CREADA', reserva });
+    return reserva;
   }
 
   // ------------------------------------------------------------------ CU-04
@@ -164,7 +175,7 @@ export class ReservaService {
   // ------------------------------------------------------------------ CU-05
   /** Cambiar fecha (diagrama CU-05): ventana de 48 h, luego cupo en la nueva fecha. */
   async cambiarFecha(codigo: string, correo: string, nuevaFecha: FechaISO): Promise<ReservaDetalle> {
-    return this.deps.uow.ejecutar(async (repos) => {
+    const { detalle, fechaAnterior } = await this.deps.uow.ejecutar(async (repos) => {
       const reserva = await this.reservaModificable(repos, codigo, correo, 'cambiar la fecha');
 
       if (nuevaFecha === reserva.fechaViaje) {
@@ -191,14 +202,17 @@ export class ReservaService {
         valorAnterior: reserva.fechaViaje,
         valorNuevo: nuevaFecha,
       });
-      return this.detalleObligatorio(repos, reserva.id);
+      return { detalle: await this.detalleObligatorio(repos, reserva.id), fechaAnterior: reserva.fechaViaje };
     });
+
+    avisar(this.notificador, { evento: 'FECHA_CAMBIADA', reserva: detalle, fechaAnterior });
+    return detalle;
   }
 
   // ------------------------------------------------------------------ CU-06
   /** Cancelar reserva por el turista: libera el cupo; sin reembolso (fuera de alcance). */
   async cancelar(codigo: string, correo: string): Promise<ReservaDetalle> {
-    return this.deps.uow.ejecutar(async (repos) => {
+    const detalle = await this.deps.uow.ejecutar(async (repos) => {
       const reserva = await this.reservaModificable(repos, codigo, correo, 'cancelar');
       await repos.reservas.cambiarEstado(reserva.id, EstadoReserva.Cancelada);
       await repos.bitacora.registrar({
@@ -210,6 +224,9 @@ export class ReservaService {
       });
       return this.detalleObligatorio(repos, reserva.id);
     });
+
+    avisar(this.notificador, { evento: 'CANCELADA_POR_TURISTA', reserva: detalle });
+    return detalle;
   }
 
   // ------------------------------------------------------------------ apoyo

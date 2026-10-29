@@ -1,4 +1,4 @@
-import type { SesionAdmin } from '../models/dominio';
+import type { FechaISO, ReservaDetalle, SesionAdmin } from '../models/dominio';
 import type { EstadoPagoId } from '../models/estados';
 
 /**
@@ -37,4 +37,28 @@ export interface EmisorToken {
   emitir(sesion: SesionAdmin): string;
   /** Lanza NoAutenticadoError si el token falta, venció o es inválido. */
   verificar(token: string): SesionAdmin;
+}
+
+/** Momentos en que se avisa al turista por correo. */
+export type EventoReserva =
+  | 'CREADA'
+  | 'FECHA_CAMBIADA'
+  | 'CANCELADA_POR_TURISTA'
+  | 'CANCELADA_POR_AGENCIA'
+  | 'APROBADA';
+
+export interface NotificacionReserva {
+  evento: EventoReserva;
+  reserva: ReservaDetalle;
+  /** Solo en FECHA_CAMBIADA. */
+  fechaAnterior?: FechaISO;
+}
+
+/**
+ * Avisos al turista (correo de confirmación y cambios). Los servicios lo llaman
+ * DESPUÉS del COMMIT y nunca dejan que un fallo de envío deshaga la operación.
+ * Implementaciones: infra/correo (consola, Brevo o Resend) y un doble en memoria.
+ */
+export interface Notificador {
+  notificar(notificacion: NotificacionReserva): Promise<void>;
 }
