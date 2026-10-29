@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Aviso } from '../componentes/Aviso';
 import { Boleto } from '../componentes/Boleto';
+import { BotonPdf } from '../componentes/BotonPdf';
 import { Campo } from '../componentes/Campo';
 import type { Reserva } from '../servicios/contratos';
 import { ErrorApi } from '../servicios/http';
@@ -104,6 +105,7 @@ export function MiReservaPage() {
           {error && <Aviso tono="error">{error.errorDe('fecha') ?? error.message}</Aviso>}
 
           <Boleto datos={reserva} />
+          <BotonPdf reserva={reserva} />
 
           {reserva.estadoReserva === 'Cancelada' && (
             <Aviso>Esta reserva está cancelada. Para viajar, haga una reserva nueva.</Aviso>

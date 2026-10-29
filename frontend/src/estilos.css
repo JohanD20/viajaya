@@ -61,7 +61,7 @@
     @apply inline-flex items-center justify-center rounded-control bg-caribe px-5 py-3 font-bold text-white hover:bg-caribe-oscuro disabled:cursor-not-allowed disabled:opacity-50;
   }
   .boton-secundario {
-    @apply inline-flex items-center justify-center rounded-control border border-caribe px-5 py-3 font-bold text-caribe hover:bg-superficie;
+    @apply inline-flex items-center justify-center rounded-control border border-caribe px-5 py-3 font-bold text-caribe hover:bg-superficie disabled:cursor-wait disabled:opacity-60;
   }
   .cifra {
     font-variant-numeric: tabular-nums;
