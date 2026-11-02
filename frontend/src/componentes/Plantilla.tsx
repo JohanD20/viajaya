@@ -5,7 +5,8 @@ const enlace = ({ isActive }: { isActive: boolean }) =>
 
 export function Plantilla() {
   return (
-    <>
+    // Columna de alto completo: el pie queda abajo aunque la página tenga poco contenido.
+    <div className="flex min-h-dvh flex-col">
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:bg-superficie focus:p-2">
         Saltar al contenido
       </a>
@@ -24,9 +25,14 @@ export function Plantilla() {
           </div>
         </nav>
       </header>
-      <main id="contenido">
+      <main id="contenido" className="flex-1">
         <Outlet />
       </main>
-    </>
+      <footer className="border-t border-linea">
+        <p className="mx-auto max-w-6xl px-4 py-6 text-center text-sm text-tinta-suave">
+          © 2026 ViajaYa · Universidad de Costa Rica · Desarrollado por Johan Dávila Moya
+        </p>
+      </footer>
+    </div>
   );
 }
