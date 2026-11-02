@@ -164,7 +164,7 @@ export function ReservasAdmin() {
         <table className="w-full min-w-[980px] text-left">
           <thead className="border-b-2 border-tinta text-sm">
             <tr>
-              <th className="py-2 pr-3">Código</th>
+              <th className="min-w-[8.5rem] py-2 pr-3 whitespace-nowrap">Código</th>
               <th className="py-2 pr-3">Cliente</th>
               <th className="py-2 pr-3">Destino</th>
               <th className="py-2 pr-3">Fecha</th>
@@ -180,7 +180,7 @@ export function ReservasAdmin() {
               const activa = r.estadoReserva !== 'Cancelada';
               return (
                 <tr key={r.id} className={activa ? '' : 'text-tinta-suave'}>
-                  <td className="py-3 pr-3 font-bold">{r.codigo}</td>
+                  <td className="py-3 pr-3 font-bold whitespace-nowrap">{r.codigo}</td>
                   <td className="py-3 pr-3">
                     <span className="block">{r.cliente.nombre}</span>
                     <span className="block text-sm text-tinta-suave">{r.cliente.correo}</span>

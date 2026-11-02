@@ -26,3 +26,6 @@ export function mananaEnCostaRica(): string {
 
 export const espacios = (n: number) => (n === 1 ? '1 espacio' : `${n} espacios`);
 export const personasTexto = (n: number) => (n === 1 ? '1 persona' : `${n} personas`);
+
+/** Deja solo dígitos y quita los ceros a la izquierda: "02" → "2", "010" → "10", "0" → "0". */
+export const soloEnteroPositivo = (texto: string) => texto.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
