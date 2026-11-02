@@ -7,7 +7,7 @@ import { useDestinos } from '../hooks/useDestinos';
 import type { Cotizacion } from '../servicios/contratos';
 import { ErrorApi } from '../servicios/http';
 import { useServicios } from '../servicios/ServiciosProvider';
-import { espacios, mananaEnCostaRica } from '../utilidades/formato';
+import { espacios, mananaEnCostaRica, soloEnteroPositivo } from '../utilidades/formato';
 
 /** CU-01 Buscar destinos + CU-02 Cotizar reserva. */
 export function BuscarPage() {
@@ -16,7 +16,10 @@ export function BuscarPage() {
 
   const [destinoId, setDestinoId] = useState('');
   const [fecha, setFecha] = useState('');
-  const [personas, setPersonas] = useState(1);
+  // Se guarda el texto tal como se escribe (sin ceros a la izquierda): con un
+  // estado numérico, React no corrige "01" porque 01 == 1 en un input number.
+  const [personasTexto, setPersonasTexto] = useState('1');
+  const personas = Number(personasTexto);
   const [consultando, setConsultando] = useState(false);
   const [cotizacion, setCotizacion] = useState<Cotizacion | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -133,9 +136,9 @@ export function BuscarPage() {
               min={1}
               step={1}
               required
-              value={personas}
+              value={personasTexto}
               onChange={(e) => {
-                setPersonas(Number(e.target.value));
+                setPersonasTexto(soloEnteroPositivo(e.target.value));
                 limpiarResultado();
               }}
               aria-invalid={errorPersonas ? true : undefined}
