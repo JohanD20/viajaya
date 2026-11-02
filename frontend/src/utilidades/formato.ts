@@ -29,3 +29,15 @@ export const personasTexto = (n: number) => (n === 1 ? '1 persona' : `${n} perso
 
 /** Deja solo dígitos y quita los ceros a la izquierda: "02" → "2", "010" → "10", "0" → "0". */
 export const soloEnteroPositivo = (texto: string) => texto.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+
+const FECHA_HORA = new Intl.DateTimeFormat('es-CR', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  timeZone: 'America/Costa_Rica',
+});
+
+/** Instante ISO → '01 nov 2026, 9:32 p. m.' en hora de Costa Rica. */
+export const formatearFechaHora = (instanteIso: string) => FECHA_HORA.format(new Date(instanteIso));
