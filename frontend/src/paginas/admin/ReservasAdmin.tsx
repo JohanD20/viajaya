@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Aviso } from '../../componentes/Aviso';
 import type { DestinoAdmin, EstadoPago, FiltroReservasAdmin, ReservaAdmin } from '../../servicios/contratos';
 import { ErrorApi } from '../../servicios/http';
 import { useServicios } from '../../servicios/ServiciosProvider';
-import { formatearMonto } from '../../utilidades/formato';
+import { formatearFechaHora, formatearMonto } from '../../utilidades/formato';
+import { ordenarReservas, type OrdenReservas } from '../../utilidades/ordenReservas';
 
 type Accion =
   | { tipo: 'aprobar' | 'cancelar' | 'eliminar'; reserva: ReservaAdmin }
@@ -17,6 +18,8 @@ export function ReservasAdmin() {
   const { admin } = useServicios();
   const [filtro, setFiltro] = useState<FiltroReservasAdmin>({});
   const [reservas, setReservas] = useState<ReservaAdmin[]>([]);
+  const [orden, setOrden] = useState<OrdenReservas>('creacion');
+  const ordenadas = useMemo(() => ordenarReservas(reservas, orden), [reservas, orden]);
   const [destinos, setDestinos] = useState<DestinoAdmin[]>([]);
   const [cargando, setCargando] = useState(true);
   const [accion, setAccion] = useState<Accion | null>(null);
@@ -79,7 +82,7 @@ export function ReservasAdmin() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,minmax(0,1fr))_minmax(12rem,1.2fr)]">
         <div>
           <label htmlFor="f-destino" className="etiqueta">Destino</label>
           <select id="f-destino" className="campo" value={filtro.destinoId ?? ''} onChange={(e) => cambiarFiltro('destinoId', e.target.value)}>
@@ -90,11 +93,11 @@ export function ReservasAdmin() {
           </select>
         </div>
         <div>
-          <label htmlFor="f-desde" className="etiqueta">Desde</label>
+          <label htmlFor="f-desde" className="etiqueta">Viaje desde</label>
           <input id="f-desde" type="date" className="campo" value={filtro.desde ?? ''} onChange={(e) => cambiarFiltro('desde', e.target.value)} />
         </div>
         <div>
-          <label htmlFor="f-hasta" className="etiqueta">Hasta</label>
+          <label htmlFor="f-hasta" className="etiqueta">Viaje hasta</label>
           <input id="f-hasta" type="date" className="campo" value={filtro.hasta ?? ''} onChange={(e) => cambiarFiltro('hasta', e.target.value)} />
         </div>
         <div>
@@ -113,6 +116,13 @@ export function ReservasAdmin() {
             {PAGOS.map((p) => (
               <option key={p}>{p}</option>
             ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="f-orden" className="etiqueta">Ordenar por</label>
+          <select id="f-orden" className="campo" value={orden} onChange={(e) => setOrden(e.target.value as OrdenReservas)}>
+            <option value="creacion">Fecha de creación</option>
+            <option value="viaje">Fecha del viaje</option>
           </select>
         </div>
       </div>
@@ -161,13 +171,14 @@ export function ReservasAdmin() {
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[980px] text-left">
+        <table className="w-full min-w-[1000px] text-left">
           <thead className="border-b-2 border-tinta text-sm">
             <tr>
               <th className="min-w-[8.5rem] py-2 pr-3 whitespace-nowrap">Código</th>
               <th className="py-2 pr-3">Cliente</th>
               <th className="py-2 pr-3">Destino</th>
-              <th className="py-2 pr-3">Fecha</th>
+              <th className="py-2 pr-3 whitespace-nowrap">Fecha del viaje</th>
+              <th className="py-2 pr-3">Creada</th>
               <th className="py-2 pr-3 text-right">Personas</th>
               <th className="py-2 pr-3 text-right">Monto total</th>
               <th className="py-2 pr-3">Reserva</th>
@@ -176,7 +187,7 @@ export function ReservasAdmin() {
             </tr>
           </thead>
           <tbody className="cifra divide-y divide-linea align-top">
-            {reservas.map((r) => {
+            {ordenadas.map((r) => {
               const activa = r.estadoReserva !== 'Cancelada';
               return (
                 <tr key={r.id} className={activa ? '' : 'text-tinta-suave'}>
@@ -188,6 +199,11 @@ export function ReservasAdmin() {
                   </td>
                   <td className="py-3 pr-3">{r.destino.nombre}</td>
                   <td className="py-3 pr-3 whitespace-nowrap">{r.fecha}</td>
+                  <td className="py-3 pr-3 text-sm whitespace-nowrap text-tinta-suave">
+                    {formatearFechaHora(r.creadaEn).split(', ').map((parte) => (
+                      <span key={parte} className="block">{parte}</span>
+                    ))}
+                  </td>
                   <td className="py-3 pr-3 text-right">{r.personas}</td>
                   <td className="py-3 pr-3 text-right">{formatearMonto(r.montoTotal)}</td>
                   <td className="py-3 pr-3">{r.estadoReserva}</td>
@@ -195,7 +211,7 @@ export function ReservasAdmin() {
                     {activa && r.estadoPago ? (
                       <select
                         aria-label={`Estado de pago de ${r.codigo}`}
-                        className={`campo py-1.5 ${r.estadoPago === 'Rechazado' ? 'text-error' : ''}`}
+                        className={`campo min-w-[8.5rem] py-1.5 ${r.estadoPago === 'Rechazado' ? 'text-error' : ''}`}
                         value={r.estadoPago}
                         onChange={(e) => abrir({ tipo: 'pago', reserva: r, estadoPago: e.target.value as EstadoPago })}
                       >
@@ -207,20 +223,23 @@ export function ReservasAdmin() {
                       (r.estadoPago ?? 'Sin pago')
                     )}
                   </td>
-                  <td className="py-3 text-right whitespace-nowrap">
-                    {r.estadoReserva === 'Pendiente' && (
-                      <button type="button" className="px-2 font-bold text-caribe hover:underline" onClick={() => abrir({ tipo: 'aprobar', reserva: r })}>
-                        Aprobar
+                  <td className="py-3">
+                    {/* Acciones en columna: la tabla cabe en el ancho del panel sin desplazarse. */}
+                    <div className="flex flex-col items-start gap-1 whitespace-nowrap">
+                      {r.estadoReserva === 'Pendiente' && (
+                        <button type="button" className="font-bold text-caribe hover:underline" onClick={() => abrir({ tipo: 'aprobar', reserva: r })}>
+                          Aprobar
+                        </button>
+                      )}
+                      {activa && (
+                        <button type="button" className="font-bold text-error hover:underline" onClick={() => abrir({ tipo: 'cancelar', reserva: r })}>
+                          Cancelar
+                        </button>
+                      )}
+                      <button type="button" className="text-tinta-suave hover:underline" onClick={() => abrir({ tipo: 'eliminar', reserva: r })}>
+                        Eliminar
                       </button>
-                    )}
-                    {activa && (
-                      <button type="button" className="px-2 font-bold text-error hover:underline" onClick={() => abrir({ tipo: 'cancelar', reserva: r })}>
-                        Cancelar
-                      </button>
-                    )}
-                    <button type="button" className="px-2 text-tinta-suave hover:underline" onClick={() => abrir({ tipo: 'eliminar', reserva: r })}>
-                      Eliminar
-                    </button>
+                    </div>
                   </td>
                 </tr>
               );
