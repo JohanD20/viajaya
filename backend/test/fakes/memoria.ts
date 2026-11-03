@@ -404,6 +404,7 @@ export function destinoDePrueba(cambios: Partial<Destino> = {}): Destino {
     descripcion: null,
     precioBaseCentimos: 4000,
     capacidadMaximaDiaria: 20,
+    imagenUrl: null,
     activo: true,
     ...cambios,
   };

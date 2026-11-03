@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Aviso } from '../componentes/Aviso';
 import { Boleto } from '../componentes/Boleto';
-import { ListaDestinos } from '../componentes/ListaDestinos';
+import { TarjetasDestinos } from '../componentes/TarjetasDestinos';
 import { useDestinos } from '../hooks/useDestinos';
 import type { Cotizacion } from '../servicios/contratos';
 import { ErrorApi } from '../servicios/http';
@@ -86,7 +86,7 @@ export function BuscarPage() {
 
         {destinos.length > 0 && (
           <div className="mt-8">
-            <ListaDestinos
+            <TarjetasDestinos
               destinos={destinos}
               elegido={destinoId}
               alElegir={(id) => {

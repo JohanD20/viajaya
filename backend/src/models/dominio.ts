@@ -18,6 +18,8 @@ export interface Destino {
   descripcion: string | null;
   precioBaseCentimos: number;
   capacidadMaximaDiaria: number;
+  /** Foto de portada (https). null = la interfaz usa una ilustración. */
+  imagenUrl: string | null;
   activo: boolean;
 }
 
@@ -27,6 +29,7 @@ export interface DatosDestino {
   descripcion: string | null;
   precioBaseCentimos: number;
   capacidadMaximaDiaria: number;
+  imagenUrl: string | null;
 }
 
 /** Destino visto por el administrador (CU-09), con sus reservas activas desde hoy. */

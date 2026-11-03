@@ -9,6 +9,7 @@ interface FilaDestino {
   descripcion: string | null;
   precio_base: string;
   capacidad_maxima_diaria: number;
+  imagen_url: string | null;
   activo: boolean;
 }
 
@@ -19,6 +20,7 @@ function aDestino(fila: FilaDestino): Destino {
     descripcion: fila.descripcion,
     precioBaseCentimos: aCentimos(fila.precio_base),
     capacidadMaximaDiaria: fila.capacidad_maxima_diaria,
+    imagenUrl: fila.imagen_url,
     activo: fila.activo,
   };
 }
@@ -28,7 +30,7 @@ export class PgDestinoRepository implements DestinoRepository {
 
   async listarActivos(): Promise<Destino[]> {
     const rows = await this.db.query<FilaDestino>(
-      `SELECT id, nombre, descripcion, precio_base, capacidad_maxima_diaria, activo
+      `SELECT id, nombre, descripcion, precio_base, capacidad_maxima_diaria, imagen_url, activo
          FROM destinos WHERE activo ORDER BY nombre`,
     );
     return rows.map(aDestino);
@@ -36,7 +38,7 @@ export class PgDestinoRepository implements DestinoRepository {
 
   async buscarPorId(id: Uuid): Promise<Destino | null> {
     const rows = await this.db.query<FilaDestino>(
-      `SELECT id, nombre, descripcion, precio_base, capacidad_maxima_diaria, activo
+      `SELECT id, nombre, descripcion, precio_base, capacidad_maxima_diaria, imagen_url, activo
          FROM destinos WHERE id = $1`,
       [id],
     );
@@ -45,7 +47,7 @@ export class PgDestinoRepository implements DestinoRepository {
 
   async bloquearPorId(id: Uuid): Promise<Destino | null> {
     const rows = await this.db.query<FilaDestino>(
-      `SELECT id, nombre, descripcion, precio_base, capacidad_maxima_diaria, activo
+      `SELECT id, nombre, descripcion, precio_base, capacidad_maxima_diaria, imagen_url, activo
          FROM destinos WHERE id = $1
           FOR UPDATE`,
       [id],
@@ -55,7 +57,7 @@ export class PgDestinoRepository implements DestinoRepository {
 
   async listar(filtro: FiltroDestinos): Promise<Destino[]> {
     const rows = await this.db.query<FilaDestino>(
-      `SELECT id, nombre, descripcion, precio_base, capacidad_maxima_diaria, activo
+      `SELECT id, nombre, descripcion, precio_base, capacidad_maxima_diaria, imagen_url, activo
          FROM destinos
         WHERE ($1::boolean IS NULL OR activo = $1)
           AND ($2::text IS NULL OR nombre ILIKE '%' || $2 || '%')
@@ -78,10 +80,10 @@ export class PgDestinoRepository implements DestinoRepository {
 
   async crear(d: DatosDestino): Promise<Destino> {
     const rows = await this.db.query<FilaDestino>(
-      `INSERT INTO destinos (nombre, descripcion, precio_base, capacidad_maxima_diaria)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, nombre, descripcion, precio_base, capacidad_maxima_diaria, activo`,
-      [d.nombre, d.descripcion, aTextoDecimal(d.precioBaseCentimos), d.capacidadMaximaDiaria],
+      `INSERT INTO destinos (nombre, descripcion, precio_base, capacidad_maxima_diaria, imagen_url)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, nombre, descripcion, precio_base, capacidad_maxima_diaria, imagen_url, activo`,
+      [d.nombre, d.descripcion, aTextoDecimal(d.precioBaseCentimos), d.capacidadMaximaDiaria, d.imagenUrl],
     );
     if (!rows[0]) throw new Error('La inserción del destino no devolvió datos.');
     return aDestino(rows[0]);
@@ -90,10 +92,19 @@ export class PgDestinoRepository implements DestinoRepository {
   async actualizar(id: Uuid, d: DatosDestino & { activo: boolean }): Promise<Destino> {
     const rows = await this.db.query<FilaDestino>(
       `UPDATE destinos
-          SET nombre = $2, descripcion = $3, precio_base = $4, capacidad_maxima_diaria = $5, activo = $6
+          SET nombre = $2, descripcion = $3, precio_base = $4, capacidad_maxima_diaria = $5, activo = $6,
+              imagen_url = $7
         WHERE id = $1
-       RETURNING id, nombre, descripcion, precio_base, capacidad_maxima_diaria, activo`,
-      [id, d.nombre, d.descripcion, aTextoDecimal(d.precioBaseCentimos), d.capacidadMaximaDiaria, d.activo],
+       RETURNING id, nombre, descripcion, precio_base, capacidad_maxima_diaria, imagen_url, activo`,
+      [
+        id,
+        d.nombre,
+        d.descripcion,
+        aTextoDecimal(d.precioBaseCentimos),
+        d.capacidadMaximaDiaria,
+        d.activo,
+        d.imagenUrl,
+      ],
     );
     if (!rows[0]) throw new Error('El destino a actualizar no existe.');
     return aDestino(rows[0]);
