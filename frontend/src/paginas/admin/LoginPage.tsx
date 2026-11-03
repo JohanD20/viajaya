@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Aviso } from '../../componentes/Aviso';
+import { EsperaApi } from '../../componentes/EsperaApi';
 import { ErrorApi } from '../../servicios/http';
 import { useServicios } from '../../servicios/ServiciosProvider';
 
@@ -61,6 +62,7 @@ export function LoginPage() {
           />
         </div>
         {error && <Aviso tono="error">{error}</Aviso>}
+        <EsperaApi activo={enviando} />
         <button type="submit" className="boton-primario w-full" disabled={enviando}>
           {enviando ? 'Verificando…' : 'Iniciar sesión'}
         </button>

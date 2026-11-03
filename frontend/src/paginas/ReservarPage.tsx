@@ -4,6 +4,7 @@ import { Aviso } from '../componentes/Aviso';
 import { Boleto } from '../componentes/Boleto';
 import { BotonPdf } from '../componentes/BotonPdf';
 import { Campo } from '../componentes/Campo';
+import { EsperaApi } from '../componentes/EsperaApi';
 import type { Cotizacion, Reserva, SolicitudCotizacion } from '../servicios/contratos';
 import { ErrorApi } from '../servicios/http';
 import { useServicios } from '../servicios/ServiciosProvider';
@@ -128,6 +129,7 @@ export function ReservarPage() {
             className="cifra"
           />
           {error && error.errores.length === 0 && <Aviso tono="error">{error.message}</Aviso>}
+          <EsperaApi activo={enviando} />
           <button type="submit" className="boton-primario w-full sm:w-auto" disabled={enviando || !cotizacion}>
             {enviando ? 'Registrando reserva…' : 'Confirmar y pagar'}
           </button>
