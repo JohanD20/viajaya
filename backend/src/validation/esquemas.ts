@@ -122,6 +122,15 @@ const datosDestino = {
     .int('Debe ser un número entero.')
     .min(1, 'La capacidad debe ser al menos 1.')
     .max(10_000, 'La capacidad es demasiado alta.'),
+  /** Foto de portada opcional: solo https, para no mezclar contenido inseguro. */
+  imagenUrl: z
+    .string('La imagen debe ser una dirección web.')
+    .trim()
+    .max(500, 'Máximo 500 caracteres.')
+    .nullish()
+    .transform((u) => (u ? u : null))
+    .refine((u) => u === null || /^https:\/\/\S+$/.test(u), 'Use una dirección que empiece con https://')
+    .refine((u) => u === null || URL.canParse(u), 'La dirección de la imagen no es válida.'),
 };
 
 /** POST /api/admin/destinos (CU-08) */

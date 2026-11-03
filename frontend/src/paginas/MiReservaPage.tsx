@@ -3,6 +3,7 @@ import { Aviso } from '../componentes/Aviso';
 import { Boleto } from '../componentes/Boleto';
 import { BotonPdf } from '../componentes/BotonPdf';
 import { Campo } from '../componentes/Campo';
+import { EsperaApi } from '../componentes/EsperaApi';
 import type { Reserva } from '../servicios/contratos';
 import { ErrorApi } from '../servicios/http';
 import { useServicios } from '../servicios/ServiciosProvider';
@@ -88,6 +89,7 @@ export function MiReservaPage() {
             onChange={(e) => setCredenciales((c) => ({ ...c, correo: e.target.value }))}
             error={!reserva ? error?.errorDe('correo') : undefined}
           />
+          <EsperaApi activo={ocupado && !reserva} />
           <button type="submit" className="boton-primario w-full" disabled={ocupado}>
             {ocupado && !reserva ? 'Buscando…' : 'Buscar reserva'}
           </button>

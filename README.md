@@ -58,7 +58,8 @@ Las migraciones ya están aplicadas en el proyecto de Supabase. Para recrear la 
 
 1. `database/migrations/001_esquema.sql`: las 8 tablas, la vista `v_reservas_detalle`, los índices y RLS.
 2. `database/migrations/002_rol_api.sql`: el rol `viajaya_api` con sus políticas. Después ejecute `ALTER ROLE viajaya_api PASSWORD '…';`.
-3. `database/seeds/001_destinos.sql`: los destinos de prueba.
+3. `database/migrations/003_imagen_destino.sql`: la foto de portada opcional de cada destino.
+4. `database/seeds/001_destinos.sql`: los destinos de prueba.
 
 La conexión del backend usa el **pooler de Supabase en modo sesión** con el usuario `viajaya_api.<ref>`. Cópiela de Supabase > Connect > Session pooler y cambie el usuario `postgres` por `viajaya_api`.
 

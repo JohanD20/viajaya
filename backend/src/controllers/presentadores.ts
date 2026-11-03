@@ -15,6 +15,7 @@ export function destinoPublico(d: Destino) {
     descripcion: d.descripcion,
     precioBase: aDecimal(d.precioBaseCentimos),
     capacidadMaximaDiaria: d.capacidadMaximaDiaria,
+    imagenUrl: d.imagenUrl,
   };
 }
 
