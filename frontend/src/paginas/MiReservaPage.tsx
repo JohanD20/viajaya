@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Aviso } from '../componentes/Aviso';
 import { Boleto } from '../componentes/Boleto';
 import { BotonPdf } from '../componentes/BotonPdf';
@@ -13,9 +14,16 @@ const aError = (e: unknown) =>
   e instanceof ErrorApi ? e : new ErrorApi(0, 'Error', 'Ocurrió un error inesperado. Intente de nuevo.');
 
 /** CU-04 Consultar reserva, con CU-05 Cambiar fecha y CU-06 Cancelar (extend). */
+/** Datos que deja ReservarPage al pulsar "Ir a Mi reserva" (estado del historial, no la URL). */
+interface EstadoMiReserva {
+  codigo?: string;
+  correo?: string;
+}
+
 export function MiReservaPage() {
   const { reservas } = useServicios();
-  const [credenciales, setCredenciales] = useState({ codigo: '', correo: '' });
+  const recibido = (useLocation().state as EstadoMiReserva | null) ?? {};
+  const [credenciales, setCredenciales] = useState({ codigo: recibido.codigo ?? '', correo: recibido.correo ?? '' });
   const [reserva, setReserva] = useState<Reserva | null>(null);
   const [error, setError] = useState<ErrorApi | null>(null);
   const [exito, setExito] = useState<string | null>(null);
@@ -38,6 +46,17 @@ export function MiReservaPage() {
       setOcupado(false);
     }
   }
+
+  // Si llega desde la confirmación con código y correo, consulta sola una vez
+  // (la referencia evita la doble llamada del modo estricto de React).
+  const consultaAutomatica = useRef(false);
+  useEffect(() => {
+    if (consultaAutomatica.current || !recibido.codigo || !recibido.correo) return;
+    consultaAutomatica.current = true;
+    const { codigo, correo } = recibido;
+    void ejecutar(() => reservas.consultar(codigo, correo));
+    // Dependencias vacías a propósito: solo al entrar a la página.
+  }, []);
 
   const consultar = (e: FormEvent) => {
     e.preventDefault();
