@@ -36,7 +36,7 @@ export function EsperaApi({ activo }: { activo: boolean }) {
       <p>
         <span className="block font-bold">{FRASES_ESPERA[indice]}</span>
         <span className="block text-sm text-tinta-suave">
-          La primera visita después de un rato puede tardar hasta un minuto: el servidor gratuito se duerme cuando nadie lo usa.
+          La primera visita después de un rato puede tardar hasta un minuto: el servidor se duerme cuando nadie lo usa.
         </span>
       </p>
     </div>
