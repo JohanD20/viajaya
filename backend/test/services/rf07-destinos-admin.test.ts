@@ -21,7 +21,13 @@ describe('RF-07 · CRUD de destinos (DestinoService, CU-08 a CU-11)', () => {
     servicio = new DestinoService(uow, new RelojFijo(new Date('2026-11-01T10:00:00-06:00')));
   });
 
-  const datos = { nombre: 'Volcán Poás', descripcion: null, precioBaseCentimos: 3500, capacidadMaximaDiaria: 30 };
+  const datos = {
+    nombre: 'Volcán Poás',
+    descripcion: null,
+    precioBaseCentimos: 3500,
+    capacidadMaximaDiaria: 30,
+    imagenUrl: 'https://imagenes.ejemplo.cr/poas.jpg',
+  };
 
   it('CU-08: crea un destino activo y rechaza nombres duplicados sin distinguir mayúsculas', async () => {
     const creado = await servicio.crear(datos);

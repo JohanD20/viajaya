@@ -45,6 +45,7 @@ export class AdminController {
       descripcion: d.descripcion,
       precioBaseCentimos: aCentimos(d.precioBase),
       capacidadMaximaDiaria: d.capacidadMaximaDiaria,
+      imagenUrl: d.imagenUrl,
     });
     res.status(201).json(destinoAdmin(creado));
   };
@@ -58,6 +59,7 @@ export class AdminController {
       descripcion: d.descripcion,
       precioBaseCentimos: aCentimos(d.precioBase),
       capacidadMaximaDiaria: d.capacidadMaximaDiaria,
+      imagenUrl: d.imagenUrl,
       activo: d.activo,
     });
     res.json(destinoAdmin(actualizado));
