@@ -11,6 +11,8 @@ export interface Destino {
   descripcion: string | null;
   precioBase: number;
   capacidadMaximaDiaria: number;
+  /** Foto de portada (https); null = se dibuja una ilustración. */
+  imagenUrl: string | null;
 }
 
 export interface Disponibilidad {
@@ -72,6 +74,7 @@ export interface DatosDestino {
   descripcion: string | null;
   precioBase: number;
   capacidadMaximaDiaria: number;
+  imagenUrl: string | null;
 }
 
 export interface FiltroDestinosAdmin {

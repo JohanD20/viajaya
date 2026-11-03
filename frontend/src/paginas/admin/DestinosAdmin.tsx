@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Aviso } from '../../componentes/Aviso';
 import { Campo } from '../../componentes/Campo';
+import { PortadaDestino } from '../../componentes/PortadaDestino';
 import type { DestinoAdmin, FiltroDestinosAdmin } from '../../servicios/contratos';
 import { ErrorApi } from '../../servicios/http';
 import { useServicios } from '../../servicios/ServiciosProvider';
@@ -12,10 +13,11 @@ interface Formulario {
   descripcion: string;
   precioBase: string;
   capacidadMaximaDiaria: string;
+  imagenUrl: string;
   activo: boolean;
 }
 
-const VACIO: Formulario = { id: null, nombre: '', descripcion: '', precioBase: '', capacidadMaximaDiaria: '', activo: true };
+const VACIO: Formulario = { id: null, nombre: '', descripcion: '', precioBase: '', capacidadMaximaDiaria: '', imagenUrl: '', activo: true };
 const aError = (e: unknown) => (e instanceof ErrorApi ? e : new ErrorApi(0, 'Error', 'Ocurrió un error inesperado.'));
 
 /** CU-08 Crear, CU-09 Listar, CU-10 Editar/reactivar y CU-11 Desactivar destinos. */
@@ -53,6 +55,7 @@ export function DestinosAdmin() {
       descripcion: form.descripcion.trim() || null,
       precioBase: Number(form.precioBase),
       capacidadMaximaDiaria: Number(form.capacidadMaximaDiaria),
+      imagenUrl: form.imagenUrl.trim() || null,
     };
     try {
       if (form.id) await admin.editarDestino(form.id, { ...datos, activo: form.activo });
@@ -87,6 +90,7 @@ export function DestinosAdmin() {
       descripcion: d.descripcion ?? '',
       precioBase: String(d.precioBase),
       capacidadMaximaDiaria: String(d.capacidadMaximaDiaria),
+      imagenUrl: d.imagenUrl ?? '',
       activo: d.activo,
     });
   };
@@ -147,6 +151,25 @@ export function DestinosAdmin() {
               Descripción
             </label>
             <textarea id="descripcion" rows={2} className="campo" value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} />
+          </div>
+          <div className="grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_14rem]">
+            <Campo
+              id="imagenUrl"
+              etiqueta="Foto de portada (opcional)"
+              type="url"
+              inputMode="url"
+              placeholder="https://…"
+              value={form.imagenUrl}
+              onChange={(e) => setForm({ ...form, imagenUrl: e.target.value })}
+              error={error?.errorDe('imagenUrl')}
+              ayuda="Dirección https de una imagen horizontal. Si la deja vacía, la tarjeta muestra una ilustración."
+            />
+            <figure>
+              <figcaption className="etiqueta">Vista previa</figcaption>
+              <div className="aspect-[16/9] overflow-hidden rounded-lg ring-1 ring-linea">
+                <PortadaDestino key={form.imagenUrl} nombre={form.nombre} imagenUrl={form.imagenUrl.trim() || null} />
+              </div>
+            </figure>
           </div>
           {error && error.errores.length === 0 && <Aviso tono="error">{error.message}</Aviso>}
           <div className="flex gap-3">
