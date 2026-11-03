@@ -1,9 +1,14 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 
 const enlace = ({ isActive }: { isActive: boolean }) =>
   `rounded-control px-3 py-2 font-bold ${isActive ? 'text-caribe underline underline-offset-4' : 'text-tinta hover:text-caribe'}`;
 
+/** El panel de la agencia usa más ancho para que sus tablas quepan en escritorio. */
+export const ANCHO_PANEL = 'max-w-[90rem]';
+
 export function Plantilla() {
+  const { pathname } = useLocation();
+  const ancho = pathname.startsWith('/admin') ? ANCHO_PANEL : 'max-w-6xl';
   return (
     // Columna de alto completo: el pie queda abajo aunque la página tenga poco contenido.
     <div className="flex min-h-dvh flex-col">
@@ -11,7 +16,7 @@ export function Plantilla() {
         Saltar al contenido
       </a>
       <header className="border-b border-linea">
-        <nav aria-label="Principal" className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
+        <nav aria-label="Principal" className={`mx-auto flex ${ancho} items-center justify-between gap-4 px-4 py-4`}>
           <NavLink to="/" className="font-display text-2xl font-extrabold tracking-tight">
             ViajaYa
           </NavLink>
@@ -29,7 +34,7 @@ export function Plantilla() {
         <Outlet />
       </main>
       <footer className="border-t border-linea">
-        <p className="mx-auto max-w-6xl px-4 py-6 text-center text-sm text-tinta-suave">
+        <p className={`mx-auto ${ancho} px-4 py-6 text-center text-sm text-tinta-suave`}>
           © 2026 ViajaYa · Universidad de Costa Rica · Desarrollado por Johan Dávila Moya
         </p>
       </footer>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import type { SesionAdmin } from '../../servicios/contratos';
+import { ANCHO_PANEL } from '../../componentes/Plantilla';
 import { useServicios } from '../../servicios/ServiciosProvider';
 import { DestinosAdmin } from './DestinosAdmin';
 import { ReservasAdmin } from './ReservasAdmin';
@@ -29,7 +30,7 @@ export function PanelPage() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
+    <div className={`mx-auto ${ANCHO_PANEL} px-4 py-10`}>
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <h1 className="text-4xl font-extrabold">Hola, {sesion.nombre}</h1>
         <button
