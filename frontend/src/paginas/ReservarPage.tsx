@@ -4,10 +4,12 @@ import { Aviso } from '../componentes/Aviso';
 import { Boleto } from '../componentes/Boleto';
 import { BotonPdf } from '../componentes/BotonPdf';
 import { Campo } from '../componentes/Campo';
+import { CampoTarjeta } from '../componentes/CampoTarjeta';
 import { EsperaApi } from '../componentes/EsperaApi';
 import type { Cotizacion, Reserva, SolicitudCotizacion } from '../servicios/contratos';
 import { ErrorApi } from '../servicios/http';
 import { useServicios } from '../servicios/ServiciosProvider';
+import { digitosTarjeta } from '../utilidades/tarjeta';
 
 /** CU-03 · Crear reserva con pago simulado. Llega desde la cotización (CU-02). */
 export function ReservarPage() {
@@ -52,7 +54,7 @@ export function ReservarPage() {
     setError(null);
     setEnviando(true);
     try {
-      setReserva(await reservas.crear({ ...solicitud, ...form }));
+      setReserva(await reservas.crear({ ...solicitud, ...form, numeroTarjeta: digitosTarjeta(form.numeroTarjeta) }));
       window.scrollTo({ top: 0 });
     } catch (e) {
       setError(e instanceof ErrorApi ? e : new ErrorApi(0, 'Error', 'Ocurrió un error inesperado. Intente de nuevo.'));
@@ -83,7 +85,8 @@ export function ReservarPage() {
           <Boleto datos={reserva} />
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link to="/mi-reserva" className="boton-primario">
+          {/* El código y el correo viajan en el estado del historial, nunca en la URL (S-11). */}
+          <Link to="/mi-reserva" state={{ codigo: reserva.codigo, correo: form.correo }} className="boton-primario">
             Ir a Mi reserva
           </Link>
           <BotonPdf reserva={reserva} />
@@ -116,17 +119,11 @@ export function ReservarPage() {
             ayuda="Lo necesitará junto con el código para consultar su reserva."
           />
           <Campo id="telefono" etiqueta="Teléfono" type="tel" autoComplete="tel" required value={form.telefono} onChange={cambiar('telefono')} error={error?.errorDe('telefono')} />
-          <Campo
-            id="numeroTarjeta"
-            etiqueta="Número de tarjeta"
-            inputMode="numeric"
-            autoComplete="off"
-            required
-            value={form.numeroTarjeta}
-            onChange={cambiar('numeroTarjeta')}
+          <CampoTarjeta
+            valor={form.numeroTarjeta}
+            alCambiar={(numeroTarjeta) => setForm((f) => ({ ...f, numeroTarjeta }))}
             error={error?.errorDe('numeroTarjeta')}
             ayuda="Pago simulado: no se realiza ningún cobro. Solo guardamos los últimos 4 dígitos."
-            className="cifra"
           />
           {error && error.errores.length === 0 && <Aviso tono="error">{error.message}</Aviso>}
           <EsperaApi activo={enviando} />

@@ -42,10 +42,16 @@ export function Boleto({ datos, accion }: { datos: Cotizacion | Reserva; accion?
 
       <div className="boleto-talon px-6 pb-6 pt-5">
         {reserva && (
-          <p className="mb-3">
-            <span className="block text-sm font-bold">Código de confirmación</span>
-            <span className="cifra block font-display text-3xl font-extrabold">{reserva.codigo}</span>
-          </p>
+          <div className="mb-3 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+            <p>
+              <span className="block text-sm font-bold">Código de confirmación</span>
+              <span className="cifra block font-display text-3xl font-extrabold">{reserva.codigo}</span>
+            </p>
+            <p className="min-w-0 sm:text-right">
+              <span className="block text-sm font-bold">Titular</span>
+              <span className="block text-lg font-bold break-words">{reserva.cliente.nombre}</span>
+            </p>
+          </div>
         )}
         <p className="flex items-baseline justify-between gap-4">
           <span className="font-bold">{reserva ? 'Monto total' : 'Total a pagar'}</span>
