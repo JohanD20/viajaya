@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Aviso } from '../componentes/Aviso';
 import { Boleto } from '../componentes/Boleto';
+import { EsperaApi } from '../componentes/EsperaApi';
+import { TarjetasEsqueleto } from '../componentes/Esqueletos';
 import { TarjetasDestinos } from '../componentes/TarjetasDestinos';
 import { useDestinos } from '../hooks/useDestinos';
 import type { Cotizacion } from '../servicios/contratos';
@@ -72,7 +74,12 @@ export function BuscarPage() {
           Vea el cupo del día y el precio final con IVA antes de reservar.
         </p>
 
-        {cargando && <p className="mt-8 text-tinta-suave">Cargando destinos…</p>}
+        {cargando && (
+          <div className="mt-8 space-y-5">
+            <EsperaApi activo={cargando} />
+            <TarjetasEsqueleto />
+          </div>
+        )}
         {errorCarga && (
           <div className="mt-8">
             <Aviso tono="error">{errorCarga}</Aviso>
@@ -158,6 +165,7 @@ export function BuscarPage() {
         </form>
 
         <div className="mt-6 space-y-4" aria-live="polite">
+          <EsperaApi activo={consultando} />
           {aviso && <Aviso tono="error">{aviso}</Aviso>}
           {errorApi && !errorFecha && !errorPersonas && <Aviso tono="error">{errorApi.message}</Aviso>}
           {cotizacion && (

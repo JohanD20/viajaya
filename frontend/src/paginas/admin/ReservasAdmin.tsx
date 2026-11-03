@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Aviso } from '../../componentes/Aviso';
+import { EsperaApi } from '../../componentes/EsperaApi';
+import { FilasEsqueleto } from '../../componentes/Esqueletos';
 import type { DestinoAdmin, EstadoPago, FiltroReservasAdmin, ReservaAdmin } from '../../servicios/contratos';
 import { ErrorApi } from '../../servicios/http';
 import { useServicios } from '../../servicios/ServiciosProvider';
@@ -247,7 +249,12 @@ export function ReservasAdmin() {
           </tbody>
         </table>
         {!cargando && reservas.length === 0 && <p className="py-6 text-tinta-suave">No hay reservas con esos filtros.</p>}
-        {cargando && <p className="py-6 text-tinta-suave">Cargando reservas…</p>}
+        {cargando && (
+          <div className="space-y-4 pt-4">
+            <EsperaApi activo={cargando} />
+            <FilasEsqueleto etiqueta="Cargando reservas…" />
+          </div>
+        )}
       </div>
     </div>
   );

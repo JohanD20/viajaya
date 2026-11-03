@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Aviso } from '../../componentes/Aviso';
+import { EsperaApi } from '../../componentes/EsperaApi';
+import { FilasEsqueleto } from '../../componentes/Esqueletos';
 import { Campo } from '../../componentes/Campo';
 import { PortadaDestino } from '../../componentes/PortadaDestino';
 import type { DestinoAdmin, FiltroDestinosAdmin } from '../../servicios/contratos';
@@ -242,7 +244,12 @@ export function DestinosAdmin() {
           </tbody>
         </table>
         {!cargando && destinos.length === 0 && <p className="py-6 text-tinta-suave">Sin coincidencias. Cambie el filtro o cree un destino nuevo.</p>}
-        {cargando && <p className="py-6 text-tinta-suave">Cargando destinos…</p>}
+        {cargando && (
+          <div className="space-y-4 pt-4">
+            <EsperaApi activo={cargando} />
+            <FilasEsqueleto etiqueta="Cargando destinos…" />
+          </div>
+        )}
       </div>
     </div>
   );
