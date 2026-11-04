@@ -127,7 +127,7 @@ export function ReservarPage() {
             valor={form.numeroTarjeta}
             alCambiar={(numeroTarjeta) => setForm((f) => ({ ...f, numeroTarjeta }))}
             error={error?.errorDe('numeroTarjeta')}
-            ayuda="Pago simulado, sin cobro real: si el último dígito es par el pago se aprueba; si es impar, se rechaza. Solo guardamos los últimos 4 dígitos."
+            ayuda="Pago simulado: no se realiza ningún cobro. Solo guardamos los últimos 4 dígitos."
           />
           {error && error.errores.length === 0 && <Aviso tono="error">{error.message}</Aviso>}
           <EsperaApi activo={enviando} />
