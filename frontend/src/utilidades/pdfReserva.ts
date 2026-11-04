@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
+import { LineCapStyle, PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import type { Reserva } from '../servicios/contratos';
 import { formatearFecha, formatearMonto, personasTexto } from './formato';
 
@@ -56,9 +56,11 @@ export async function crearPdfReserva(r: Reserva, opciones: OpcionesPdf): Promis
 
   // ---------- Encabezado ----------
   let y = ALTO - MARGEN;
-  escribir('ViajaYa', MARGEN, y - 20, 26, negrita);
-  aLaDerecha('Comprobante de reserva', ANCHO - MARGEN, y - 14, 11, normal, C.suave);
-  y -= 40;
+  dibujarLogo(pagina, MARGEN, y + 6, 0.62);
+  escribir('Viaja', MARGEN + 36, y - 24, 26, negrita);
+  escribir('Ya', MARGEN + 36 + negrita.widthOfTextAtSize('Viaja', 26), y - 24, 26, negrita, C.caribe);
+  aLaDerecha('Comprobante de reserva', ANCHO - MARGEN, y - 20, 11, normal, C.suave);
+  y -= 42;
   pagina.drawLine({ start: { x: MARGEN, y }, end: { x: ANCHO - MARGEN, y }, thickness: 1, color: C.linea });
 
   // ---------- Boleto ----------
@@ -150,6 +152,26 @@ export async function crearPdfReserva(r: Reserva, opciones: OpcionesPdf): Promis
   aLaDerecha('ViajaYa · Sistema de Reservas Turísticas', ANCHO - MARGEN, MARGEN, 9, normal, C.suave);
 
   return doc.save();
+}
+
+/**
+ * Logo de ViajaYa (el mismo dibujo de componentes/Logo.tsx): pin oscuro, V
+ * blanca y el punto amarillo. (x, y) es la esquina superior izquierda.
+ */
+function dibujarLogo(pagina: PDFPage, x: number, y: number, escala: number): void {
+  pagina.drawSvgPath(
+    'M24 2C12.4 2 3 11.2 3 22.6c0 14.3 17.6 29.3 19.6 31 .8.7 2 .7 2.8 0C27.4 51.9 45 36.9 45 22.6 45 11.2 35.6 2 24 2z',
+    { x, y, scale: escala, color: C.tinta },
+  );
+  pagina.drawSvgPath('M14 14.5l9.4 21.6c3.7-10.4 8.2-15.6 14.1-18', {
+    x,
+    y,
+    scale: escala,
+    borderColor: C.blanco,
+    borderWidth: 5.4,
+    borderLineCap: LineCapStyle.Round,
+  });
+  pagina.drawCircle({ x: x + 35.8 * escala, y: y - 10.6 * escala, size: 4.6 * escala, color: C.sol });
 }
 
 /** Línea punteada y muescas semicirculares entre el cuerpo y el talón, como en la interfaz. */

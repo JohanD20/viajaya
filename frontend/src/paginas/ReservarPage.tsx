@@ -6,11 +6,11 @@ import { BotonPdf } from '../componentes/BotonPdf';
 import { Campo } from '../componentes/Campo';
 import { CampoTarjeta } from '../componentes/CampoTarjeta';
 import { EsperaApi } from '../componentes/EsperaApi';
+import { IconoBoleto, IconoCandado, IconoCorreo, IconoTelefono, IconoUsuario } from '../componentes/Iconos';
 import { PasosReserva } from '../componentes/PasosReserva';
 import type { Cotizacion, Reserva, SolicitudCotizacion } from '../servicios/contratos';
 import { ErrorApi } from '../servicios/http';
 import { useServicios } from '../servicios/ServiciosProvider';
-import { formatearMonto } from '../utilidades/formato';
 import { digitosTarjeta } from '../utilidades/tarjeta';
 
 /** CU-03 · Crear reserva con pago simulado. Llega desde la cotización (CU-02). */
@@ -90,6 +90,7 @@ export function ReservarPage() {
         <div className="mt-6 flex flex-wrap gap-3">
           {/* El código y el correo viajan en el estado del historial, nunca en la URL (S-11). */}
           <Link to="/mi-reserva" state={{ codigo: reserva.codigo, correo: form.correo }} className="boton-primario">
+            <IconoBoleto />
             Ir a Mi reserva
           </Link>
           <BotonPdf reserva={reserva} />
@@ -110,10 +111,11 @@ export function ReservarPage() {
           Complete su reserva
         </h1>
         <form onSubmit={reservar} noValidate className="mt-8 max-w-lg space-y-5">
-          <Campo id="nombre" etiqueta="Nombre completo" autoComplete="name" required value={form.nombre} onChange={cambiar('nombre')} error={error?.errorDe('nombre')} />
+          <Campo id="nombre" etiqueta="Nombre completo" icono={<IconoUsuario />} autoComplete="name" required value={form.nombre} onChange={cambiar('nombre')} error={error?.errorDe('nombre')} />
           <Campo
             id="correo"
             etiqueta="Correo"
+            icono={<IconoCorreo />}
             type="email"
             autoComplete="email"
             required
@@ -122,7 +124,7 @@ export function ReservarPage() {
             error={error?.errorDe('correo')}
             ayuda="Lo necesitará junto con el código para consultar su reserva."
           />
-          <Campo id="telefono" etiqueta="Teléfono" type="tel" autoComplete="tel" required value={form.telefono} onChange={cambiar('telefono')} error={error?.errorDe('telefono')} />
+          <Campo id="telefono" etiqueta="Teléfono" icono={<IconoTelefono />} type="tel" autoComplete="tel" required value={form.telefono} onChange={cambiar('telefono')} error={error?.errorDe('telefono')} />
           <CampoTarjeta
             valor={form.numeroTarjeta}
             alCambiar={(numeroTarjeta) => setForm((f) => ({ ...f, numeroTarjeta }))}
@@ -132,7 +134,8 @@ export function ReservarPage() {
           {error && error.errores.length === 0 && <Aviso tono="error">{error.message}</Aviso>}
           <EsperaApi activo={enviando} />
           <button type="submit" className="boton-primario w-full sm:w-auto" disabled={enviando || !cotizacion}>
-            {enviando ? 'Registrando reserva…' : `Confirmar y pagar${cotizacion ? ` ${formatearMonto(cotizacion.montoTotal)}` : ''}`}
+            <IconoCandado />
+            {enviando ? 'Registrando reserva…' : 'Confirmar y pagar'}
           </button>
         </form>
       </section>

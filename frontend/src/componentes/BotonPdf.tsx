@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Reserva } from '../servicios/contratos';
+import { IconoDescargar } from './Iconos';
 
 /**
  * Descarga el comprobante de la reserva en PDF. pdf-lib se carga solo al hacer
@@ -25,6 +26,7 @@ export function BotonPdf({ reserva, className = 'boton-secundario' }: { reserva:
   return (
     <span className="inline-flex flex-col gap-1">
       <button type="button" className={className} onClick={descargar} disabled={generando}>
+        <IconoDescargar />
         {generando ? 'Generando PDF…' : 'Descargar PDF'}
       </button>
       {error && (

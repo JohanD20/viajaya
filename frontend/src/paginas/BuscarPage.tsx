@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Aviso } from '../componentes/Aviso';
 import { Boleto } from '../componentes/Boleto';
 import { EsperaApi } from '../componentes/EsperaApi';
+import { IconoBuscar, IconoCalendario, IconoPersonas } from '../componentes/Iconos';
 import { TarjetasEsqueleto } from '../componentes/Esqueletos';
 import { TarjetasDestinos } from '../componentes/TarjetasDestinos';
 import { useDestinos } from '../hooks/useDestinos';
@@ -111,6 +112,8 @@ export function BuscarPage() {
             <label htmlFor="fecha" className="etiqueta">
               Fecha del viaje
             </label>
+            <div className="relative">
+            <IconoCalendario className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-tinta-suave" />
             <input
               id="fecha"
               type="date"
@@ -123,8 +126,9 @@ export function BuscarPage() {
               }}
               aria-invalid={errorFecha ? true : undefined}
               aria-describedby={errorFecha ? 'error-fecha' : undefined}
-              className="campo"
+              className="campo pl-11"
             />
+            </div>
             {errorFecha && (
               <p id="error-fecha" className="mt-1 text-sm text-error">
                 {errorFecha}
@@ -136,6 +140,8 @@ export function BuscarPage() {
             <label htmlFor="personas" className="etiqueta">
               Personas
             </label>
+            <div className="relative">
+            <IconoPersonas className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-tinta-suave" />
             <input
               id="personas"
               type="number"
@@ -150,8 +156,9 @@ export function BuscarPage() {
               }}
               aria-invalid={errorPersonas ? true : undefined}
               aria-describedby={errorPersonas ? 'error-personas' : undefined}
-              className="campo cifra"
+              className="campo cifra pl-11"
             />
+            </div>
             {errorPersonas && (
               <p id="error-personas" className="mt-1 text-sm text-error">
                 {errorPersonas}
@@ -160,6 +167,7 @@ export function BuscarPage() {
           </div>
 
           <button type="submit" className="boton-primario w-full" disabled={consultando}>
+            <IconoBuscar />
             {consultando ? 'Consultando cupo…' : 'Ver cupo y precio'}
           </button>
         </form>
