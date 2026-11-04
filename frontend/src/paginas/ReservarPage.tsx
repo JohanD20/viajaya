@@ -6,9 +6,11 @@ import { BotonPdf } from '../componentes/BotonPdf';
 import { Campo } from '../componentes/Campo';
 import { CampoTarjeta } from '../componentes/CampoTarjeta';
 import { EsperaApi } from '../componentes/EsperaApi';
+import { PasosReserva } from '../componentes/PasosReserva';
 import type { Cotizacion, Reserva, SolicitudCotizacion } from '../servicios/contratos';
 import { ErrorApi } from '../servicios/http';
 import { useServicios } from '../servicios/ServiciosProvider';
+import { formatearMonto } from '../utilidades/formato';
 import { digitosTarjeta } from '../utilidades/tarjeta';
 
 /** CU-03 · Crear reserva con pago simulado. Llega desde la cotización (CU-02). */
@@ -70,6 +72,7 @@ export function ReservarPage() {
   if (reserva) {
     return (
       <div className="mx-auto max-w-xl px-4 py-10">
+        <PasosReserva actual={3} />
         <h1 className="text-4xl font-extrabold">Reserva registrada</h1>
         <p className="mt-3 text-lg text-tinta-suave">
           Guarde su código de confirmación. Con él y su correo puede consultar, cambiar la fecha o cancelar su reserva.
@@ -102,6 +105,7 @@ export function ReservarPage() {
   return (
     <div className="mx-auto grid max-w-6xl gap-10 px-4 py-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:py-12">
       <section aria-labelledby="titulo-reservar">
+        <PasosReserva actual={2} />
         <h1 id="titulo-reservar" className="text-4xl font-extrabold">
           Complete su reserva
         </h1>
@@ -123,12 +127,12 @@ export function ReservarPage() {
             valor={form.numeroTarjeta}
             alCambiar={(numeroTarjeta) => setForm((f) => ({ ...f, numeroTarjeta }))}
             error={error?.errorDe('numeroTarjeta')}
-            ayuda="Pago simulado: no se realiza ningún cobro. Solo guardamos los últimos 4 dígitos."
+            ayuda="Pago simulado, sin cobro real: si el último dígito es par el pago se aprueba; si es impar, se rechaza. Solo guardamos los últimos 4 dígitos."
           />
           {error && error.errores.length === 0 && <Aviso tono="error">{error.message}</Aviso>}
           <EsperaApi activo={enviando} />
           <button type="submit" className="boton-primario w-full sm:w-auto" disabled={enviando || !cotizacion}>
-            {enviando ? 'Registrando reserva…' : 'Confirmar y pagar'}
+            {enviando ? 'Registrando reserva…' : `Confirmar y pagar${cotizacion ? ` ${formatearMonto(cotizacion.montoTotal)}` : ''}`}
           </button>
         </form>
       </section>
