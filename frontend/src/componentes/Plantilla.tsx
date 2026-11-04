@@ -1,8 +1,9 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { IconoBoleto, IconoEscudo } from './Iconos';
 import { Logo } from './Logo';
 
 const enlace = ({ isActive }: { isActive: boolean }) =>
-  `rounded-control px-3 py-2 font-bold ${isActive ? 'text-caribe underline underline-offset-4' : 'text-tinta hover:text-caribe'}`;
+  `inline-flex items-center gap-2 rounded-control px-3 py-2 font-bold ${isActive ? 'text-caribe underline underline-offset-4' : 'text-tinta hover:text-caribe'}`;
 
 /** El panel de la agencia usa más ancho para que sus tablas quepan en escritorio. */
 export const ANCHO_PANEL = 'max-w-[90rem]';
@@ -23,9 +24,11 @@ export function Plantilla() {
           </NavLink>
           <div className="flex items-center gap-1">
             <NavLink to="/mi-reserva" className={enlace}>
+              <IconoBoleto />
               Mi reserva
             </NavLink>
             <NavLink to="/admin" className={enlace}>
+              <IconoEscudo />
               Agencia
             </NavLink>
           </div>
@@ -34,10 +37,23 @@ export function Plantilla() {
       <main id="contenido" className="flex-1">
         <Outlet />
       </main>
-      <footer className="border-t border-linea">
-        <p className={`mx-auto ${ancho} px-4 py-6 text-center text-sm text-tinta-suave`}>
-          © 2026 ViajaYa · Universidad de Costa Rica · Desarrollado por Johan Dávila Moya
-        </p>
+      <footer className="bg-tinta text-white">
+        <div className={`mx-auto ${ancho} flex flex-wrap items-center justify-between gap-x-8 gap-y-4 px-4 pt-8 pb-6`}>
+          <div>
+            <Logo claro />
+            <p className="mt-2 text-sm text-white/75">Excursiones en Costa Rica con cupo confirmado al instante.</p>
+          </div>
+          <nav aria-label="Pie de página" className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-bold">
+            <NavLink to="/" className="hover:text-sol">Destinos</NavLink>
+            <NavLink to="/mi-reserva" className="hover:text-sol">Mi reserva</NavLink>
+            <NavLink to="/admin" className="hover:text-sol">Agencia</NavLink>
+          </nav>
+        </div>
+        <div className="border-t border-white/15">
+          <p className={`mx-auto ${ancho} px-4 py-4 text-center text-sm text-white/75`}>
+            © 2026 ViajaYa · Universidad de Costa Rica · Desarrollado por Johan Dávila Moya
+          </p>
+        </div>
       </footer>
     </div>
   );
