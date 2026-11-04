@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Logo } from './Logo';
 
 const enlace = ({ isActive }: { isActive: boolean }) =>
   `rounded-control px-3 py-2 font-bold ${isActive ? 'text-caribe underline underline-offset-4' : 'text-tinta hover:text-caribe'}`;
@@ -17,8 +18,8 @@ export function Plantilla() {
       </a>
       <header className="border-b border-linea">
         <nav aria-label="Principal" className={`mx-auto flex ${ancho} items-center justify-between gap-4 px-4 py-4`}>
-          <NavLink to="/" className="font-display text-2xl font-extrabold tracking-tight">
-            ViajaYa
+          <NavLink to="/" aria-label="ViajaYa, inicio">
+            <Logo />
           </NavLink>
           <div className="flex items-center gap-1">
             <NavLink to="/mi-reserva" className={enlace}>
