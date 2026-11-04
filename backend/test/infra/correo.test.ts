@@ -87,7 +87,7 @@ describe('Correos al turista · plantillas y proveedores (infra/correo)', () => 
       { evento: 'APROBADA', reserva: detalle({ cliente: { nombre: '<img src=x onerror=alert(1)>', correo: 'a@b.cr', telefono: '1' } }) },
       'https://viajaya.giize.com',
     );
-    expect(c.html).not.to.include('<img');
+    expect(c.html).not.to.include('<img src=x');
     expect(c.html).to.include('&lt;img src=x onerror=alert(1)&gt;');
     expect(escaparHtml(`"'&`)).to.equal('&quot;&#39;&amp;');
   });

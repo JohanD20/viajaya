@@ -5,6 +5,7 @@ import { Boleto } from '../componentes/Boleto';
 import { BotonPdf } from '../componentes/BotonPdf';
 import { Campo } from '../componentes/Campo';
 import { EsperaApi } from '../componentes/EsperaApi';
+import { IconoBuscar, IconoCalendario, IconoCodigo, IconoCorreo } from '../componentes/Iconos';
 import type { Reserva } from '../servicios/contratos';
 import { ErrorApi } from '../servicios/http';
 import { useServicios } from '../servicios/ServiciosProvider';
@@ -90,6 +91,7 @@ export function MiReservaPage() {
           <Campo
             id="codigo"
             etiqueta="Código de confirmación"
+            icono={<IconoCodigo />}
             placeholder="VY-XXXXXX"
             autoComplete="off"
             required
@@ -101,6 +103,7 @@ export function MiReservaPage() {
           <Campo
             id="correo"
             etiqueta="Correo"
+            icono={<IconoCorreo />}
             type="email"
             autoComplete="email"
             required
@@ -110,6 +113,7 @@ export function MiReservaPage() {
           />
           <EsperaApi activo={ocupado && !reserva} />
           <button type="submit" className="boton-primario w-full" disabled={ocupado}>
+            <IconoBuscar />
             {ocupado && !reserva ? 'Buscando…' : 'Buscar reserva'}
           </button>
         </form>
@@ -145,6 +149,7 @@ export function MiReservaPage() {
                 <Campo
                   id="nuevaFecha"
                   etiqueta="Nueva fecha"
+                  icono={<IconoCalendario />}
                   type="date"
                   required
                   min={mananaEnCostaRica()}

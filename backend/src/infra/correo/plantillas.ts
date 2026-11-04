@@ -85,7 +85,10 @@ function contenido(evento: EventoReserva, r: ReservaDetalle, fechaAnterior?: Fec
 export function componerCorreo(n: NotificacionReserva, sitioUrl: string): CorreoSaliente {
   const r = n.reserva;
   const c = contenido(n.evento, r, n.fechaAnterior);
-  const enlace = `${sitioUrl.replace(/\/+$/, '')}/mi-reserva`;
+  const sitio = sitioUrl.replace(/\/+$/, '');
+  const enlace = `${sitio}/mi-reserva`;
+  // Logo en PNG servido por el sitio (Gmail y Outlook no muestran SVG).
+  const logo = `${sitio}/logo-correo.png`;
   const filas: Array<[string, string]> = [
     ['Código', r.codigoConfirmacion],
     ['Destino', r.destino.nombre],
@@ -119,7 +122,12 @@ export function componerCorreo(n: NotificacionReserva, sitioUrl: string): Correo
 <html lang="es"><head><meta charset="utf-8"><title>${e(c.asunto)}</title></head>
 <body style="margin:0;padding:24px;background:#f1f5f3;font-family:Arial,Helvetica,sans-serif;color:#13302b">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #cddbd6">
-<tr><td style="padding:24px 28px 8px;font-size:24px;font-weight:bold">ViajaYa</td></tr>
+<tr><td style="padding:22px 28px 10px;border-bottom:4px solid #0e6b61">
+<table role="presentation" cellpadding="0" cellspacing="0"><tr>
+<td style="padding-right:10px"><img src="${e(logo)}" width="32" height="37" alt="" style="display:block;border:0"></td>
+<td style="font-size:26px;font-weight:bold;color:#13302b">Viaja<span style="color:#0e6b61">Ya</span></td>
+</tr></table>
+</td></tr>
 <tr><td style="padding:8px 28px">
 <p style="margin:0 0 12px">Hola ${e(r.cliente.nombre)}:</p>
 <h1 style="margin:0 0 12px;font-size:20px">${e(c.titulo)}</h1>
@@ -138,7 +146,7 @@ ${filas
 <tr><td style="padding:20px 28px">
 <a href="${e(enlace)}" style="display:inline-block;background:#0e6b61;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 20px">Ver mi reserva</a>
 </td></tr>
-<tr><td style="padding:12px 28px 24px;font-size:12px;color:#4a625c;border-top:1px solid #cddbd6">${e(nota)}</td></tr>
+<tr><td style="padding:14px 28px 18px;font-size:12px;color:#d7e3df;background:#13302b">${e(nota)}<br><span style="color:#ffffff">© 2026 ViajaYa · Universidad de Costa Rica</span></td></tr>
 </table>
 </body></html>`;
 

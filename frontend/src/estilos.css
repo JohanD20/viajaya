@@ -58,10 +58,10 @@
     @apply mb-1 block font-bold text-tinta;
   }
   .boton-primario {
-    @apply inline-flex items-center justify-center rounded-control bg-caribe px-5 py-3 font-bold text-white hover:bg-caribe-oscuro disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-control bg-caribe px-5 py-3 font-bold text-white hover:bg-caribe-oscuro disabled:cursor-not-allowed disabled:opacity-50;
   }
   .boton-secundario {
-    @apply inline-flex items-center justify-center rounded-control border border-caribe px-5 py-3 font-bold text-caribe hover:bg-superficie disabled:cursor-wait disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-control border border-caribe px-5 py-3 font-bold text-caribe hover:bg-superficie disabled:cursor-wait disabled:opacity-60;
   }
   .cifra {
     font-variant-numeric: tabular-nums;

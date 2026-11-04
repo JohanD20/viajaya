@@ -1,5 +1,6 @@
 import type { Destino } from '../servicios/contratos';
 import { formatearMonto } from '../utilidades/formato';
+import { IconoPersonas } from './Iconos';
 import { PortadaDestino } from './PortadaDestino';
 
 /**
@@ -53,12 +54,7 @@ export function TarjetasDestinos({
                   <span className="font-display text-xl leading-tight font-bold">{d.nombre}</span>
                   {d.descripcion && <span className="line-clamp-2 text-sm text-tinta-suave">{d.descripcion}</span>}
                   <span className="mt-1 flex items-center gap-1.5 text-sm text-tinta-suave">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <circle cx="9" cy="8" r="3.2" />
-                      <path d="M3.5 19c.6-3.3 2.8-5 5.5-5s4.9 1.7 5.5 5" />
-                      <circle cx="17" cy="9" r="2.4" />
-                      <path d="M16.5 14c2.2.1 3.7 1.6 4 4.4" />
-                    </svg>
+                    <IconoPersonas className="size-4 shrink-0" />
                     Hasta {d.capacidadMaximaDiaria} personas por día
                   </span>
                   <span className="mt-auto flex items-end justify-between gap-3 pt-3">
