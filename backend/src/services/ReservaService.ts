@@ -164,12 +164,19 @@ export class ReservaService {
   async consultar(codigo: string, correo: string): Promise<ConsultaReserva> {
     const reserva = await this.deps.uow.lectura.reservas.buscarDetallePorCodigoYCorreo(codigo, correo);
     if (!reserva) throw new NoEncontradoError(NO_ENCONTRADA);
-    return {
-      reserva,
-      modificable:
-        esReservaActiva(reserva.estadoReservaId) &&
-        VentanaService.permiteCambio(reserva.fechaViaje, this.deps.reloj.ahora()),
-    };
+    return { reserva, modificable: this.esModificable(reserva) };
+  }
+
+  /**
+   * RN-02 · ¿La reserva admite todavía cambio de fecha o cancelación? Solo si
+   * está activa y faltan más de 48 horas. Lo usan todas las respuestas públicas
+   * (crear, consultar, cambiar fecha y cancelar) para no fijar el valor a mano.
+   */
+  esModificable(reserva: ReservaDetalle): boolean {
+    return (
+      esReservaActiva(reserva.estadoReservaId) &&
+      VentanaService.permiteCambio(reserva.fechaViaje, this.deps.reloj.ahora())
+    );
   }
 
   // ------------------------------------------------------------------ CU-05
