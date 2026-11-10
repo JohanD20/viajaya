@@ -23,8 +23,8 @@ En un 400 se agrega `errores: [{ "campo": "correo", "mensaje": "Correo inválido
 | 400 | Formato o rango inválido |
 | 401 | Sin sesión, token vencido o credenciales incorrectas |
 | 404 | Recurso inexistente, o código y correo que no coinciden (mensaje genérico, RNF-06) |
-| 409 | RN-01 cupo insuficiente, estado incompatible o conflicto (por ejemplo, nombre duplicado) |
-| 422 | RN-02 faltan 48 horas o menos, destino inactivo, fecha no futura o capacidad menor a lo reservado (RC-06) |
+| 409 | RN-01 cupo insuficiente, estado incompatible, capacidad menor a lo ya reservado (RC-06) o conflicto (por ejemplo, nombre duplicado) |
+| 422 | RN-02 faltan 48 horas o menos, destino inactivo o fecha no futura |
 | 429 | Demasiados intentos: login 5/min, consulta de reserva 10/min, creación de reservas 10 cada 10 min |
 | 503 | Base de datos no disponible |
 
@@ -78,6 +78,7 @@ Content-Type: application/json
 - El teléfono y el correo no se devuelven; de la tarjeta solo se guardan y muestran los últimos 4 dígitos (S-05).
 - Con una tarjeta que termina en dígito par el pago queda Aprobado; con dígito impar, Rechazado (RN-04). La reserva se registra en ambos casos.
 - Después del COMMIT se envía el correo de confirmación; si el proveedor falla, la reserva no se afecta.
+- `modificable` indica si todavía se puede cambiar la fecha o cancelar: la reserva está activa y faltan más de 48 horas (RN-02). Se calcula igual al crear, consultar, cambiar la fecha y cancelar; para una excursión dentro de 48 horas es `false`.
 
 ## Endpoints de administración (JWT)
 
