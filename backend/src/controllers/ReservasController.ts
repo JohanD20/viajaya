@@ -29,7 +29,7 @@ export class ReservasController {
       cliente: { nombre: d.nombre, correo: d.correo, telefono: d.telefono },
       numeroTarjeta: d.numeroTarjeta,
     });
-    res.status(201).json(reservaPublica(reserva, true));
+    res.status(201).json(reservaPublica(reserva, this.reservas.esModificable(reserva)));
   };
 
   /** POST /api/reservas/consulta · CU-04 */
@@ -43,13 +43,15 @@ export class ReservasController {
   cambiarFecha: RequestHandler = async (req, res) => {
     const { codigo } = parametroCodigo.parse(req.params);
     const { correo, fecha } = cuerpoCambioFecha.parse(req.body);
-    res.json(reservaPublica(await this.reservas.cambiarFecha(codigo, correo, fecha), true));
+    const reserva = await this.reservas.cambiarFecha(codigo, correo, fecha);
+    res.json(reservaPublica(reserva, this.reservas.esModificable(reserva)));
   };
 
   /** PATCH /api/reservas/:codigo/cancelacion · CU-06 */
   cancelar: RequestHandler = async (req, res) => {
     const { codigo } = parametroCodigo.parse(req.params);
     const { correo } = cuerpoCancelacion.parse(req.body);
-    res.json(reservaPublica(await this.reservas.cancelar(codigo, correo), false));
+    const reserva = await this.reservas.cancelar(codigo, correo);
+    res.json(reservaPublica(reserva, this.reservas.esModificable(reserva)));
   };
 }
